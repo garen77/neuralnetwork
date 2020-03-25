@@ -56,31 +56,19 @@ void linalg::Matrix::print(void) {
 	}
 }
 
-nn::FullyConnected::FullyConnected(int numInputs, int numOutputs) {
-	this->W = new double* [numOutputs];
-	this->ni = numInputs;
-	this->no = numOutputs;
+nn::FullyConnected::FullyConnected(int ni, int no):numInputs(ni), numOutputs(no) {
+	this->weights = new linalg::Matrix(numOutputs, numInputs);	
 	for (int i = 0; i < numOutputs; i++) {
-		this->W[i] = new double [numInputs];
 		for (int j = 0; j < numInputs; j++) {
-			this->W[i][j] = ((double)rand() / (RAND_MAX));
+			this->weights->getElements()[i][j] = ((double)rand() / (RAND_MAX));
 		}
 	}
 }
 
-void nn::FullyConnected::train(double** trainIns, double** trainOuts, const int inSize, int outSize, int trainSize, int numEpochs, double rateLearning) {
-	for (int e = 0; e < numEpochs; e++) {
-		for (int j = 0; j < trainSize; j++) {
-			std::vector<double> sampleIn(inSize);
-			std::vector<double> sampleOut(outSize);
-			for (int i = 0; i < inSize; i++) {
-				sampleIn.push_back(trainIns[i][j]);
-			}
-			for (int i = 0; i < outSize; i++) {
-				sampleOut.push_back(trainIns[i][j]);
-			}
+linalg::Matrix* nn::FullyConnected::getWeights() {
+	return this->weights;
+}
 
-		}
-	}
-
+linalg::Matrix* nn::FullyConnected::feedForward(linalg::Matrix* input) {
+	return (*this->weights) * (*input);
 }

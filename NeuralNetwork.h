@@ -26,14 +26,15 @@ namespace nn {
 	class FullyConnected {
 
 	private:
-		double** W;
-		int ni, no;
+		linalg::Matrix* weights;
+		int numInputs, numOutputs;
 
 	public:
 
-		FullyConnected(int numInputs, int numOutputs);
+		FullyConnected(int ni, int no);
 
+		linalg::Matrix* getWeights();
 
-		void train(double** trainIns, double** trainOuts, const int inSize, int outSize, int trainSize, int numEpochs, double rateLearning);
+		linalg::Matrix* feedForward(linalg::Matrix* input);
 	};
 }
