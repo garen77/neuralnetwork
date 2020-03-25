@@ -69,6 +69,10 @@ linalg::Matrix* nn::FullyConnected::getWeights() {
 	return this->weights;
 }
 
+linalg::Matrix* nn::FullyConnected::getOutput() {
+	return this->output;
+}
+
 linalg::Matrix* nn::FullyConnected::feedForward(linalg::Matrix* input) {
 	return (*this->weights) * (*input);
 }

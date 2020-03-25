@@ -29,11 +29,14 @@ namespace nn {
 		linalg::Matrix* weights;
 		int numInputs, numOutputs;
 
+		linalg::Matrix* output;
+
 	public:
 
 		FullyConnected(int ni, int no);
 
 		linalg::Matrix* getWeights();
+		linalg::Matrix* getOutput();
 
 		linalg::Matrix* feedForward(linalg::Matrix* input);
 	};
