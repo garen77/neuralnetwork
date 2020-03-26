@@ -31,6 +31,8 @@ namespace nn {
 
 		linalg::Matrix* output;
 
+		FullyConnected* previousLayer;
+
 	public:
 
 		FullyConnected(int ni, int no);
@@ -39,5 +41,13 @@ namespace nn {
 		linalg::Matrix* getOutput();
 
 		linalg::Matrix* feedForward(linalg::Matrix* input);
+		void backPropagate(linalg::Matrix* expected);
+
+	};
+
+	class NeuralNet {
+
+	private:
+
 	};
 }

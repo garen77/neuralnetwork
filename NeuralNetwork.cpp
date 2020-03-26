@@ -76,3 +76,7 @@ linalg::Matrix* nn::FullyConnected::getOutput() {
 linalg::Matrix* nn::FullyConnected::feedForward(linalg::Matrix* input) {
 	return (*this->weights) * (*input);
 }
+
+void nn::FullyConnected::backPropagate(linalg::Matrix* expected) {
+
+}
