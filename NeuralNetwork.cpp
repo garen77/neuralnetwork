@@ -69,14 +69,33 @@ linalg::Matrix* nn::FullyConnected::getWeights() {
 	return this->weights;
 }
 
+linalg::Matrix* nn::FullyConnected::getInput() {
+	return this->input;
+}
+
 linalg::Matrix* nn::FullyConnected::getOutput() {
 	return this->output;
 }
 
 linalg::Matrix* nn::FullyConnected::feedForward(linalg::Matrix* input) {
-	return (*this->weights) * (*input);
+	this->input = input;
+	this->output = (*this->weights) * (*input);
+	return this->output;
 }
 
-void nn::FullyConnected::backPropagate(linalg::Matrix* expected) {
-
+void nn::FullyConnected::backPropagate(linalg::Matrix& expected, double learningRate) {
+	int nr = this->numOutputs;
+	int nc = this->numInputs;
+	linalg::Matrix* weightsMatrix = this->getWeights();
+	double diffOut = 0.0;
+	for (int i = 0; i < nr; i++) {
+		diffOut += expected.getElements()[0][i] - this->output->getElements()[0][i];
+	}
+	for (int i = 0; i < nr; i++) {
+		for (int j = 0; j < nc; j++) {
+			double w = weightsMatrix->getElements()[i][j];
+			double x = 
+			w = w + learningRate * diffOut * this->input->getElements()[0][j];
+		}
+	}
 }

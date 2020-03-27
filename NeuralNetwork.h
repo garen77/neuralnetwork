@@ -28,7 +28,7 @@ namespace nn {
 	private:
 		linalg::Matrix* weights;
 		int numInputs, numOutputs;
-
+		linalg::Matrix* input;
 		linalg::Matrix* output;
 
 		FullyConnected* previousLayer;
@@ -38,10 +38,11 @@ namespace nn {
 		FullyConnected(int ni, int no);
 
 		linalg::Matrix* getWeights();
+		linalg::Matrix* getInput();
 		linalg::Matrix* getOutput();
 
 		linalg::Matrix* feedForward(linalg::Matrix* input);
-		void backPropagate(linalg::Matrix* expected);
+		void backPropagate(linalg::Matrix& expected, double learningRate);
 
 	};
 
