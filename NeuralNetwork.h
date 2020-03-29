@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 namespace linalg {
 
 	class Matrix {
@@ -49,6 +51,12 @@ namespace nn {
 	class NeuralNet {
 
 	private:
-
+        std::vector<FullyConnected>* layers;
+        int numOfLayers;
+        
+    public:
+        NeuralNet(int nl);
+        
+        void learn(linalg::Matrix& trainingSet);
 	};
 }

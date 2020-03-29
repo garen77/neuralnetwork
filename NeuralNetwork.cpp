@@ -94,8 +94,34 @@ void nn::FullyConnected::backPropagate(linalg::Matrix& expected, double learning
 	for (int i = 0; i < nr; i++) {
 		for (int j = 0; j < nc; j++) {
 			double w = weightsMatrix->getElements()[i][j];
-			double x = 
-			w = w + learningRate * diffOut * this->input->getElements()[0][j];
+            double x = this->input->getElements()[0][j];
+			w = w + learningRate * diffOut * x;
+            weightsMatrix->getElements()[i][j] = w;
 		}
 	}
 }
+
+
+nn::NeuralNet::NeuralNet(int nl):numOfLayers(nl) {
+    this->layers = new std::vector<FullyConnected>(nl);
+}
+
+void nn::NeuralNet::learn(linalg::Matrix& trainingSet) {
+    /*
+     training set
+     [[x1,y1],[x2,y2],...,[xn,yn]]
+     */
+    int numOfSamples = trainingSet.getNumCols();
+    for(int i=0; i<numOfSamples; i++) {
+        // forward phase
+        for (FullyConnected fc : (*this->layers)) {
+            
+            fc.feedForward(&trainingSet);
+            
+        }
+    }
+    
+
+    
+}
+
