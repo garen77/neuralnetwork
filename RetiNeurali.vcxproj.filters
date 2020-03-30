@@ -18,13 +18,21 @@
     <ClInclude Include="NeuralNetwork.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="LinearAlgebra.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NeuralNetwork.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
     <ClCompile Include="Origine.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="RetiNeurali.rc">
+      <Filter>File di risorse</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
