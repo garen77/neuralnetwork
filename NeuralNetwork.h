@@ -37,9 +37,10 @@ namespace nn {
     private:
         std::vector<FullyConnected*>* layers;
         int numOfLayers;
+        int** configurazione;
 
     public:
-        NeuralNet(int nl);
+        NeuralNet(int** conf, int nl);
 
         void learn(linalg::Matrix<double>& trainingSet);
     };
@@ -48,7 +49,7 @@ namespace nn {
     void FullyConnected::init(int ni, int no) {
         this->numInputs = ni;
         this->numOutputs = no;
-        this->weights = new linalg::Matrix<double>(no, ni);
+        this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, ni);
         for (int i = 0; i < no; i++) {
             for (int j = 0; j < ni; j++) {
                 this->weights->getElements()[i][j] = ((double)rand() / (RAND_MAX));
@@ -57,7 +58,7 @@ namespace nn {
     }
 
     FullyConnected::FullyConnected(int ni, int no) :numInputs(ni), numOutputs(no) {
-        this->weights = new linalg::Matrix<double>(numOutputs, numInputs);
+        this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, numInputs);
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
                 this->weights->getElements()[i][j] = ((double)rand() / (RAND_MAX));
@@ -103,11 +104,16 @@ namespace nn {
     }
 
 
-    NeuralNet::NeuralNet(int nl) :numOfLayers(nl) {
-
+    NeuralNet::NeuralNet(int** conf, int nl) :configurazione(conf), numOfLayers(nl) {
+        /*
+         [[ni1,no1],[ni2,no2],...,[nik,nok]]
+        */
+       
         this->layers = new std::vector<FullyConnected*>(nl);
         for (int i = 0; i < nl; i++) {
-            FullyConnected* fc = new FullyConnected(0, 0);
+            int ni = this->configurazione[i][0];
+            int no = this->configurazione[i][1];
+            FullyConnected* fc = new FullyConnected(ni, no);
             this->layers->push_back(fc);
         }
 
