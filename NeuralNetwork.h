@@ -28,7 +28,7 @@ namespace nn {
         linalg::Matrix<double>* getOutput();
 
         linalg::Matrix<double>* feedForward(linalg::Matrix<double>* input);
-        void backPropagate(linalg::Matrix<double>& expected, double learningRate);
+        void backPropagate(linalg::Matrix<double>* expected, double learningRate);
 
     };
 
@@ -85,13 +85,13 @@ namespace nn {
     }
 
 
-    void FullyConnected::backPropagate(linalg::Matrix<double>& expected, double learningRate) {
+    void FullyConnected::backPropagate(linalg::Matrix<double>* expected, double learningRate) {
         int nr = this->numOutputs;
         int nc = this->numInputs;
         linalg::Matrix<double>* weightsMatrix = this->getWeights();
         double diffOut = 0.0;
         for (int i = 0; i < nr; i++) {
-            diffOut += expected.getElements()[0][i] - this->output->getElements()[0][i];
+            diffOut += expected->getElements()[0][i] - this->output->getElements()[0][i];
         }
         for (int i = 0; i < nr; i++) {
             for (int j = 0; j < nc; j++) {
@@ -126,16 +126,35 @@ namespace nn {
          */
         int numOfSamples = trainingSet->getNumCols();
         for (int i = 0; i < numOfSamples; i++) {
-
-            /*linalg::Matrix<double>* sampleIO = trainingSet->getElements()[0][i];
+            
+            linalg::Matrix<double>* sampleIO = trainingSet->getElements()[0][i];
             int numRows = sampleIO->getNumRows();
-            int numCols = sampleIO->getNumCols();
-            linalg::Matrix<double>* sampleI = 
-            // forward phase
-            for (FullyConnected* fc : (*this->layers)) {
-                fc->feedForward();
 
-            }*/
+            double** x = new double*[numRows];
+            
+            for(int h=0; h<numRows; h++) {
+                x[h] = new double[1];
+                x[h][0] = sampleIO->getElements()[h][0];
+            }
+            linalg::Matrix<double>* sampleIn = new linalg::Matrix<double>(linalg::MatrixType::Numeric, x, numRows, 1);
+            
+            double** y = new double*[numRows];
+            for(int h=0; h<numRows; h++) {
+                y[h] = new double[1];
+                y[h][0] = sampleIO->getElements()[h][1];
+            }
+            linalg::Matrix<double>* sampleOut = new linalg::Matrix<double>(linalg::MatrixType::Numeric, y, numRows, 1);
+
+            // forward phase
+            for(std::vector<FullyConnected*>::iterator it = this->layers->begin(); it != this->layers->end(); ++it) {
+                (*it)->feedForward(sampleIn);
+            }
+            
+            // error back propagation
+            for(std::vector<FullyConnected*>::reverse_iterator it = this->layers->rbegin(); it != this->layers->rend(); ++it) {
+                (*it)->backPropagate(sampleOut, 0.05);
+            }
+            
         }
     }
 
