@@ -22,7 +22,8 @@ namespace linalg {
 
     public:
         Matrix(MatrixType ty, int nr, int nc);
-
+        Matrix(MatrixType ty, T** elems, int nr, int nc);
+        
         T** getElements();
         int getNumRows(void);
         int getNumCols(void);
@@ -89,6 +90,16 @@ namespace linalg {
         }
     }
 
+    template <class T>
+    Matrix<T>::Matrix(MatrixType ty, T** elems, int nr, int nc): type(ty), numRows(nr), numCols(nc) {
+        this->elements = new T * [numRows];
+        for (int i = 0; i < numRows; i++) {
+            this->elements[i] = new T[numCols];
+            for (int j = 0; j < numCols; j++) {
+                this->elements[i][j] = elems[i][j];                
+            }
+        }
+    }
     template <class T>
     T** Matrix<T>::getElements() {
         return this->elements;

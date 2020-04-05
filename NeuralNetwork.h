@@ -42,7 +42,7 @@ namespace nn {
     public:
         NeuralNet(int** conf, int nl);
 
-        void learn(linalg::Matrix<double>& trainingSet);
+        void learn(linalg::Matrix<linalg::Matrix<double>*>* trainingSet);
     };
 
 
@@ -119,19 +119,23 @@ namespace nn {
 
     }
 
-    void NeuralNet::learn(linalg::Matrix<double>& trainingSet) {
+    void NeuralNet::learn(linalg::Matrix<linalg::Matrix<double>*>* trainingSet) {
         /*
          training set
          [[x1,y1],[x2,y2],...,[xn,yn]]
          */
-        int numOfSamples = trainingSet.getNumCols();
+        int numOfSamples = trainingSet->getNumCols();
         for (int i = 0; i < numOfSamples; i++) {
+
+            /*linalg::Matrix<double>* sampleIO = trainingSet->getElements()[0][i];
+            int numRows = sampleIO->getNumRows();
+            int numCols = sampleIO->getNumCols();
+            linalg::Matrix<double>* sampleI = 
             // forward phase
             for (FullyConnected* fc : (*this->layers)) {
+                fc->feedForward();
 
-                fc->feedForward(&trainingSet);
-
-            }
+            }*/
         }
     }
 
