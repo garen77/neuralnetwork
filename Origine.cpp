@@ -47,27 +47,25 @@ int main(int argc, char* argv[]) {
 	linalg::Matrix<double>* y = fc2->feedForward(y1);
 
 	y->print();
-
+	*/
 	// layers configuration
-	int cc[3][2] = { {3,4},{3,3},{2,3} };
-	int** conf = new int* [3];
+
+	int** conf = new int* [1];
 	for (int i = 0; i < 3; i++) {
 		conf[i] = new int[2];
 	}
-	conf[0][0] = 4;
-	conf[0][1] = 3;
+	conf[0][0] = 2;
+	conf[0][1] = 1;
 
-	conf[1][0] = 3;
-	conf[1][1] = 3;
-
-	conf[2][0] = 3;
-	conf[2][1] = 2;
+	nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 1);
 
 	// training set
-	linalg::Matrix<linalg::Matrix<double>>* trainingSet = new linalg::Matrix<linalg::Matrix<double>>(1, 10);
 
-	trainingSet->*/
+	linalg::Matrix<linalg::Matrix<double>*>* trainingSet = new linalg::Matrix<linalg::Matrix<double>*>(linalg::MatrixType::Matrix, 1, 10);
 
+	linalg::Matrix<double>* x1y1 = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 1);
+	
+	x1y1->getElements[0][0] = 
 
 
 	//nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 3);
