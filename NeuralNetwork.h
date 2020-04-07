@@ -43,6 +43,8 @@ namespace nn {
         NeuralNet(int** conf, int nl);
 
         void learn(linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet);
+        linalg::Matrix<double>* fit(linalg::Matrix<double>* x);
+
     };
 
 
@@ -109,7 +111,8 @@ namespace nn {
          [[ni1,no1],[ni2,no2],...,[nik,nok]]
         */
        
-        this->layers = new std::vector<FullyConnected*>(nl);
+        this->layers = new std::vector<FullyConnected*>();
+        this->layers->reserve(nl);
         for (int i = 0; i < nl; i++) {
             int ni = this->configurazione[i][0];
             int no = this->configurazione[i][1];
@@ -122,40 +125,35 @@ namespace nn {
     void NeuralNet::learn(linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet) {
         /*
          training set
-         [[x1,y1],[x2,y2],...,[xn,yn]]
+         [[[x1],[y1]],[[x2],[y2]],...,[[xn],[yn]]]
          */
         int numOfSamples = trainingSet->getNumCols();
         for (int i = 0; i < numOfSamples; i++) {
             
             linalg::Matrix<linalg::Matrix<double>*>* sampleIO = trainingSet->getElements()[0][i];
-            int numRows = sampleIO->getNumRows();
 
-            double** x = new double*[numRows];
-            
-            for(int h=0; h<numRows; h++) {
-                x[h] = new double[1];
-                x[h][0] = sampleIO->getElements()[h][0];
-            }
-            linalg::Matrix<double>* sampleIn = new linalg::Matrix<double>(linalg::MatrixType::Numeric, x, numRows, 1);
-            
-            double** y = new double*[numRows];
-            for(int h=0; h<numRows; h++) {
-                y[h] = new double[1];
-                y[h][0] = sampleIO->getElements()[h][1];
-            }
-            linalg::Matrix<double>* sampleOut = new linalg::Matrix<double>(linalg::MatrixType::Numeric, y, numRows, 1);
+            linalg::Matrix<double>* x = sampleIO->getElements()[0][0];
+            linalg::Matrix<double>* y = sampleIO->getElements()[0][1];
 
             // forward phase
             for(std::vector<FullyConnected*>::iterator it = this->layers->begin(); it != this->layers->end(); ++it) {
-                (*it)->feedForward(sampleIn);
+                (*it)->feedForward(x);
             }
             
             // error back propagation
             for(std::vector<FullyConnected*>::reverse_iterator it = this->layers->rbegin(); it != this->layers->rend(); ++it) {
-                (*it)->backPropagate(sampleOut, 0.05);
+                (*it)->backPropagate(y, 0.05);
             }
             
         }
+    }
+
+    linalg::Matrix<double>* NeuralNet::fit(linalg::Matrix<double>* x) {
+        linalg::Matrix<double>* y = new linalg::Matrix<double>(linalg::MatrixType::Numeric,1,1);
+        for (std::vector<FullyConnected*>::iterator it = this->layers->begin(); it != this->layers->end(); ++it) {
+            y = (*it)->feedForward(x);
+        }
+        return y;
     }
 
 }

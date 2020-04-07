@@ -21,6 +21,9 @@ int main(int argc, char* argv[]) {
 	linalg::Matrix<double>* m3 = (*m1) * (*m2);
 	std::cout << m3;
 
+
+	//linalg::Matrix<linalg::Matrix<double>*>* tt = new linalg::Matrix<linalg::Matrix<double>*>(linalg::MatrixType::Matrix, 1, 2);
+	
 	/*nn::FullyConnected* fc1 = new nn::FullyConnected(3, 2);
 	
 	linalg::Matrix<double>* neuralInput = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 3, 1);
@@ -60,15 +63,32 @@ int main(int argc, char* argv[]) {
 	nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 1);
 
 	// training set
-
-	linalg::Matrix<linalg::Matrix<double>*>* trainingSet = new linalg::Matrix<linalg::Matrix<double>*>(linalg::MatrixType::Matrix, 1, 10);
-
-	linalg::Matrix<double>* x1y1 = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 1);
+	linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet = new linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>(linalg::MatrixType::Matrix, 1, 10);
 	
-	x1y1->getElements[0][0] = 
+	
+	for (int i = 0; i < 10; i++) {
+		trainingSet->getElements()[0][i] = new linalg::Matrix<linalg::Matrix<double>*>(linalg::MatrixType::Matrix, 1, 2);
+		linalg::Matrix<linalg::Matrix<double>*>* xy = static_cast<linalg::Matrix<linalg::Matrix<double>*>*>(trainingSet->getElements()[0][i]);
+		xy->getElements()[0][0] = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 1);
+		xy->getElements()[0][1] = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 1, 1);
+		
+		linalg::Matrix<double>* x = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][0]);
+		x->getElements()[0][0] = i;
+		x->getElements()[0][0] = i + 1;
 
+		linalg::Matrix<double>* y = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][1]);
+		y->getElements()[0][0] = i + i + 1;
+	}
+	
+	linalg::Matrix<double>* x = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 1);
 
-	//nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 3);
+	x->getElements()[0][0] = 1;
+	x->getElements()[0][0] = 2;
+
+	neuralNet->learn(trainingSet);
+
+	linalg::Matrix<double>* y = neuralNet->fit(x);
+	std::cout << y;
 
 
 }

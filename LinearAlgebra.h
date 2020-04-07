@@ -18,7 +18,7 @@ namespace linalg {
         int numRows;
         int numCols;
         T** elements;
-        MatrixType type;
+		MatrixType type;
 
     public:
         Matrix(MatrixType ty, int nr, int nc);
@@ -83,9 +83,9 @@ namespace linalg {
         for (int i = 0; i < numRows; i++) {
             this->elements[i] = new T[numCols];
             for (int j = 0; j < numCols; j++) {
-                if (this->type == MatrixType::Numeric) {
+                /*if (this->type == MatrixType::Numeric) {
                     this->elements[i][j] = 0.0;
-                }
+                }*/
             }
         }
     }
