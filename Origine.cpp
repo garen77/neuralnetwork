@@ -74,16 +74,19 @@ int main(int argc, char* argv[]) {
 		
 		linalg::Matrix<double>* x = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][0]);
 		x->getElements()[0][0] = i;
-		x->getElements()[0][0] = i + 1;
+		x->getElements()[1][0] = i + 1;
 
 		linalg::Matrix<double>* y = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][1]);
 		y->getElements()[0][0] = i + i + 1;
+		
+		std::cout << "x" << i << " = " << x << "\n";
+		std::cout << "y" << i << " = " << y << "\n";
 	}
 	
 	linalg::Matrix<double>* x = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 1);
 
 	x->getElements()[0][0] = 1;
-	x->getElements()[0][0] = 2;
+	x->getElements()[1][0] = 2;
 
 	neuralNet->learn(trainingSet);
 
