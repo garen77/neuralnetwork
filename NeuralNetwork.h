@@ -28,7 +28,7 @@ namespace nn {
         linalg::Matrix<double>* getOutput();
 
         linalg::Matrix<double>* feedForward(linalg::Matrix<double>* input);
-        void backPropagate(linalg::Matrix<double>* expected, double learningRate);
+        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, double learningRate);
 
     };
 
@@ -87,7 +87,7 @@ namespace nn {
     }
 
 
-    void FullyConnected::backPropagate(linalg::Matrix<double>* expected, double learningRate) {
+    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* expected, double learningRate) {
         int nr = this->numOutputs;
         int nc = this->numInputs;
         linalg::Matrix<double>* weightsMatrix = this->getWeights();
@@ -98,11 +98,12 @@ namespace nn {
         for (int i = 0; i < nr; i++) {
             for (int j = 0; j < nc; j++) {
                 double w = weightsMatrix->getElements()[i][j];
-                double x = this->input->getElements()[0][j];
-                w = w + learningRate * diffOut * x;
+                double x = this->input->getElements()[j][0];
+                w = w - learningRate * diffOut * x;
                 weightsMatrix->getElements()[i][j] = w;
             }
         }
+        return this->getInput();
     }
 
 
@@ -136,13 +137,16 @@ namespace nn {
             linalg::Matrix<double>* y = sampleIO->getElements()[0][1];
 
             // forward phase
-            for(std::vector<FullyConnected*>::iterator it = this->layers->begin(); it != this->layers->end(); ++it) {
-                (*it)->feedForward(x);
+            linalg::Matrix<double>* yTemp = this->layers->front()->feedForward(x);
+            
+            for(int i = 1; i < this->layers->size(); ++i) {
+                yTemp = this->layers->at(i)->feedForward(yTemp);    
             }
             
             // error back propagation
-            for(std::vector<FullyConnected*>::reverse_iterator it = this->layers->rbegin(); it != this->layers->rend(); ++it) {
-                (*it)->backPropagate(y, 0.05);
+            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(yTemp, 0.05);
+            for(int j = this->layers->size() - 2; j>=0; --j) {
+                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05);
             }
             
         }
