@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 	conf[0][1] = 1;
 
 	nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 1);
-	const int numOfSamples = 30;
+	const int numOfSamples = 5;
 	// training set
 	linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet = new linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>(linalg::MatrixType::Matrix, 1, numOfSamples);
 	

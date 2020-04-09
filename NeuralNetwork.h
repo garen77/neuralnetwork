@@ -83,6 +83,10 @@ namespace nn {
     linalg::Matrix<double>* FullyConnected::feedForward(linalg::Matrix<double>* input) {
         this->input = input;
         this->output = (*this->weights) * (*input);
+
+        std::cout << "\nfeed forward\n";
+        std::cout << this->getWeights();
+
         return this->getOutput();
     }
 
@@ -103,6 +107,11 @@ namespace nn {
                 weightsMatrix->getElements()[i][j] = w;
             }
         }
+
+        std::cout << "\nback propagation\n";
+        std::cout << this->getWeights();
+
+
         return this->getInput();
     }
 
@@ -144,10 +153,11 @@ namespace nn {
             }
             
             // error back propagation
-            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(yTemp, 0.05);
+            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.05);
             for(int j = this->layers->size() - 2; j>=0; --j) {
                 xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05);
             }
+
             
         }
     }
