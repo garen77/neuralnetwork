@@ -6,6 +6,11 @@
 #include "LinearAlgebra.h"
 #include <cmath>
 
+
+double relu(double inp) {
+    return inp > 0 ? inp : 0;
+}
+
 namespace nn {
 
     class FullyConnected {
@@ -17,11 +22,16 @@ namespace nn {
         linalg::Matrix<double>* output;
 
         FullyConnected* previousLayer;
-
+        double(*activation)(double inp);
+        
     public:
     
         FullyConnected(int ni, int no);
+        
+        FullyConnected(int ni, int no, double(*activ)(double));
 
+        
+        
         void init(int ni, int no);
 
         linalg::Matrix<double>* getWeights();
@@ -53,6 +63,7 @@ namespace nn {
         this->numInputs = ni;
         this->numOutputs = no;
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, ni);
+        
         for (int i = 0; i < no; i++) {
             for (int j = 0; j < ni; j++) {
                 this->weights->getElements()[i][j] = ((double)((random() % 100 + 1)/100));
@@ -61,6 +72,7 @@ namespace nn {
     }
 
     FullyConnected::FullyConnected(int ni, int no) :numInputs(ni), numOutputs(no) {
+        this->activation = &relu;
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, numInputs);
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
@@ -84,16 +96,15 @@ namespace nn {
     linalg::Matrix<double>* FullyConnected::feedForward(linalg::Matrix<double>* input) {
         this->input = input;
         this->output = (*this->weights) * (*input);
-
-        std::cout << "\nfeed forward\n";
-        std::cout << this->getWeights();
         
         for (int i=0; i<this->numOutputs; i++) {
             double o = this->output->getElements()[i][0];
-            o = 1/(1 + std::exp(-o));
+            o = (this->activation)(o);//1/(1 + std::exp(-o));
             this->output->getElements()[i][0] = o;
         }
     
+        std::cout << "\nout";
+        std::cout << this->getOutput();
         return this->getOutput();
     }
 
@@ -117,7 +128,7 @@ namespace nn {
             }
         }
 
-        std::cout << "\nback propagation\n";
+        std::cout << "\nback propagation";
         std::cout << this->getWeights();
 
 
