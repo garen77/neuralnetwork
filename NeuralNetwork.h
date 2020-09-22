@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "LinearAlgebra.h"
+#include <cmath>
 
 namespace nn {
 
@@ -54,7 +55,7 @@ namespace nn {
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, ni);
         for (int i = 0; i < no; i++) {
             for (int j = 0; j < ni; j++) {
-                this->weights->getElements()[i][j] = ((double)rand() / (RAND_MAX));
+                this->weights->getElements()[i][j] = ((double)((random() % 100 + 1)/100));
             }
         }
     }
@@ -63,7 +64,7 @@ namespace nn {
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, numInputs);
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
-                this->weights->getElements()[i][j] = ((double)rand() / (RAND_MAX));
+                this->weights->getElements()[i][j] = ((double)((random() % 100 + 1)/100));
             }
         }
     }
@@ -86,7 +87,13 @@ namespace nn {
 
         std::cout << "\nfeed forward\n";
         std::cout << this->getWeights();
-
+        
+        for (int i=0; i<this->numOutputs; i++) {
+            double o = this->output->getElements()[i][0];
+            o = 1/(1 + std::exp(-o));
+            this->output->getElements()[i][0] = o;
+        }
+    
         return this->getOutput();
     }
 
@@ -100,10 +107,12 @@ namespace nn {
             diffOut += expected->getElements()[0][i] - this->output->getElements()[0][i];
         }
         for (int i = 0; i < nr; i++) {
+            double o = this->output->getElements()[0][i];
             for (int j = 0; j < nc; j++) {
                 double w = weightsMatrix->getElements()[i][j];
                 double x = this->input->getElements()[j][0];
-                w = w - learningRate * diffOut * x;
+                
+                w = w - learningRate * diffOut * x * o * (1 - o);
                 weightsMatrix->getElements()[i][j] = w;
             }
         }
@@ -153,9 +162,9 @@ namespace nn {
             }
             
             // error back propagation
-            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.05);
+            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.005);
             for(int j = this->layers->size() - 2; j>=0; --j) {
-                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05);
+                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.005);
             }
 
             
