@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 	conf[0][1] = 1;
 
 	nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 1);
-	const int numOfSamples = 5;
+	const int numOfSamples = 40;
 	// training set
 	linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet = new linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>(linalg::MatrixType::Matrix, 1, numOfSamples);
 	
@@ -79,8 +79,8 @@ int main(int argc, char* argv[]) {
 		linalg::Matrix<double>* y = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][1]);
 		y->getElements()[0][0] = i + i + 1;
 		
-		std::cout << "x" << i << " = " << x << "\n";
-		std::cout << "y" << i << " = " << y << "\n";
+		//std::cout << "x" << i << " = " << x << "\n";
+		//std::cout << "y" << i << " = " << y << "\n";
 	}
 	
 	linalg::Matrix<double>* x = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 1);

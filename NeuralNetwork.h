@@ -5,10 +5,14 @@
 
 #include "LinearAlgebra.h"
 #include <cmath>
-
+#include <cstdlib>
 
 double relu(double inp) {
     return inp > 0 ? inp : 0;
+}
+
+double linear(double inp) {
+    return inp;
 }
 
 namespace nn {
@@ -66,7 +70,7 @@ namespace nn {
         
         for (int i = 0; i < no; i++) {
             for (int j = 0; j < ni; j++) {
-                this->weights->getElements()[i][j] = ((double)((random() % 100 + 1)/100));
+                this->weights->getElements()[i][j] = ((double)((rand() % 100 + 1)/100));
             }
         }
     }
@@ -74,9 +78,10 @@ namespace nn {
     FullyConnected::FullyConnected(int ni, int no) :numInputs(ni), numOutputs(no) {
         this->activation = &relu;
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, numInputs);
+        std::cout << "\nexample rand() : " << ((double)((double)(rand() % 100 + 1)/(double)100 )) << "\n";
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
-                this->weights->getElements()[i][j] = ((double)((random() % 100 + 1)/100));
+                this->weights->getElements()[i][j] = ((double)((double)(rand() % 100 + 1) / (double)100));
             }
         }
     }
@@ -100,11 +105,12 @@ namespace nn {
         for (int i=0; i<this->numOutputs; i++) {
             double o = this->output->getElements()[i][0];
             o = (this->activation)(o);//1/(1 + std::exp(-o));
+            //std::cout << "\n0="<<o<<" i="<<i<<"\n";
             this->output->getElements()[i][0] = o;
         }
     
-        std::cout << "\nout";
-        std::cout << this->getOutput();
+        /*std::cout << "\nout";
+        std::cout << this->getOutput();*/
         return this->getOutput();
     }
 
@@ -128,8 +134,8 @@ namespace nn {
             }
         }
 
-        std::cout << "\nback propagation";
-        std::cout << this->getWeights();
+        //std::cout << "\nback propagation";
+        //std::cout << this->getWeights();
 
 
         return this->getInput();
