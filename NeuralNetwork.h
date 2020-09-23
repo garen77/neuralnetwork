@@ -15,6 +15,10 @@ double linear(double inp) {
     return inp;
 }
 
+double sigmoid(double inp) {
+    return 1/(1 + std::exp(-inp));
+}
+
 namespace nn {
 
     class FullyConnected {
@@ -76,9 +80,9 @@ namespace nn {
     }
 
     FullyConnected::FullyConnected(int ni, int no) :numInputs(ni), numOutputs(no) {
-        this->activation = &relu;
+        this->activation = &sigmoid;
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, numInputs);
-        std::cout << "\nexample rand() : " << ((double)((double)(rand() % 100 + 1)/(double)100 )) << "\n";
+        //std::cout << "\nexample rand() : " << ((double)((double)(rand() % 100 + 1)/(double)100 )) << "\n";
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
                 this->weights->getElements()[i][j] = ((double)((double)(rand() % 100 + 1) / (double)100));
@@ -179,9 +183,9 @@ namespace nn {
             }
             
             // error back propagation
-            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.005);
+            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.05);
             for(int j = this->layers->size() - 2; j>=0; --j) {
-                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.005);
+                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05);
             }
 
             
