@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstdlib>
 
+bool isLogActive = true;
+
 double relu(double inp) {
     return inp > 0 ? inp : 0;
 }
@@ -109,12 +111,14 @@ namespace nn {
         for (int i=0; i<this->numOutputs; i++) {
             double o = this->output->getElements()[i][0];
             o = (this->activation)(o);//1/(1 + std::exp(-o));
-            //std::cout << "\n0="<<o<<" i="<<i<<"\n";
+            if (isLogActive) {
+                std::cout << "\no=" << o << " i=" << i << "\n";
+            }
             this->output->getElements()[i][0] = o;
         }
     
-        /*std::cout << "\nout";
-        std::cout << this->getOutput();*/
+        std::cout << "\nout";
+        std::cout << this->getOutput();
         return this->getOutput();
     }
 
@@ -137,9 +141,10 @@ namespace nn {
                 weightsMatrix->getElements()[i][j] = w;
             }
         }
-
-        //std::cout << "\nback propagation";
-        //std::cout << this->getWeights();
+        if (isLogActive) {
+            std::cout << "\nback propagation";
+            std::cout << this->getWeights();
+        }
 
 
         return this->getInput();

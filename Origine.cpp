@@ -3,7 +3,7 @@
 
 int main(int argc, char* argv[]) {
 
-	linalg::Matrix<double>* m1 = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 2);
+	/*linalg::Matrix<double>* m1 = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 2, 2);
 	m1->getElements()[0][0] = 1;
 	m1->getElements()[0][1] = 2;
 	m1->getElements()[1][0] = 3;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
 
 	//linalg::Matrix<linalg::Matrix<double>*>* tt = new linalg::Matrix<linalg::Matrix<double>*>(linalg::MatrixType::Matrix, 1, 2);
 	
-	/*nn::FullyConnected* fc1 = new nn::FullyConnected(3, 2);
+	nn::FullyConnected* fc1 = new nn::FullyConnected(3, 2);
 	
 	linalg::Matrix<double>* neuralInput = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 3, 1);
 	neuralInput->getElements()[0][0] = 1;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
 	conf[0][1] = 1;
 
 	nn::NeuralNet* neuralNet = new nn::NeuralNet(conf, 1);
-	const int numOfSamples = 40;
+	const int numOfSamples = 10;
 	// training set
 	linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet = new linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>(linalg::MatrixType::Matrix, 1, numOfSamples);
 	
@@ -73,11 +73,13 @@ int main(int argc, char* argv[]) {
 		xy->getElements()[0][1] = new linalg::Matrix<double>(linalg::MatrixType::Numeric, 1, 1);
 		
 		linalg::Matrix<double>* x = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][0]);
-		x->getElements()[0][0] = i;
-		x->getElements()[1][0] = i + 1;
+		double x1 = (double)((double)(rand() % numOfSamples + 1));
+		double x2 = (double)((double)(rand() % numOfSamples + 1));
+		x->getElements()[0][0] = x1;
+		x->getElements()[1][0] = x2;
 
 		linalg::Matrix<double>* y = static_cast<linalg::Matrix<double>*>(xy->getElements()[0][1]);
-		y->getElements()[0][0] = i + i + 1;
+		y->getElements()[0][0] = x2 -3*x1 >= 0 ? 1 : 0;
 		
 		//std::cout << "x" << i << " = " << x << "\n";
 		//std::cout << "y" << i << " = " << y << "\n";
