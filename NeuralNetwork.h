@@ -30,7 +30,8 @@ namespace nn {
         int numInputs, numOutputs;
         linalg::Matrix<double>* input;
         linalg::Matrix<double>* output;
-
+        linalg::Matrix<double>* biases;
+        
         FullyConnected* previousLayer;
         double(*activation)(double inp);
         
@@ -73,22 +74,27 @@ namespace nn {
         this->numInputs = ni;
         this->numOutputs = no;
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, ni);
+        this->biases = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, 1);
         
         for (int i = 0; i < no; i++) {
             for (int j = 0; j < ni; j++) {
                 this->weights->getElements()[i][j] = ((double)((rand() % 100 + 1)/100));
             }
+            this->biases->getElements()[i][0] = ((double)((rand() % 100 + 1)/100));
         }
     }
 
     FullyConnected::FullyConnected(int ni, int no) :numInputs(ni), numOutputs(no) {
         this->activation = &sigmoid;
         this->weights = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, numInputs);
+        this->biases = new linalg::Matrix<double>(linalg::MatrixType::Numeric, numOutputs, 1);
+        
         //std::cout << "\nexample rand() : " << ((double)((double)(rand() % 100 + 1)/(double)100 )) << "\n";
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
                 this->weights->getElements()[i][j] = ((double)((double)(rand() % 100 + 1) / (double)100));
             }
+            this->biases->getElements()[i][0] = ((double)((double)(rand() % 100 + 1) / (double)100));
         }
     }
 
@@ -106,7 +112,12 @@ namespace nn {
 
     linalg::Matrix<double>* FullyConnected::feedForward(linalg::Matrix<double>* input) {
         this->input = input;
+        //o = W*i
         this->output = (*this->weights) * (*input);
+        //o = o + b
+        for (int i=0; i<this->numOutputs; i++) {
+            this->output->getElements()[i][0] = this->output->getElements()[i][0] + this->biases->getElements()[i][0];
+        }
         
         for (int i=0; i<this->numOutputs; i++) {
             double o = this->output->getElements()[i][0];
@@ -127,6 +138,7 @@ namespace nn {
         int nr = this->numOutputs;
         int nc = this->numInputs;
         linalg::Matrix<double>* weightsMatrix = this->getWeights();
+        
         double diffOut = 0.0;
         for (int i = 0; i < nr; i++) {
             diffOut += expected->getElements()[0][i] - this->output->getElements()[0][i];
