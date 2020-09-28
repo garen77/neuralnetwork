@@ -50,7 +50,8 @@ namespace nn {
         linalg::Matrix<double>* getOutput();
 
         linalg::Matrix<double>* feedForward(linalg::Matrix<double>* input);
-        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, double learningRate);
+        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, double learningRate, bool isOutputLayer);
+        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, linalg::Matrix<double>* inp, double learningRate, bool isOutputLayer);
 
     };
 
@@ -134,10 +135,17 @@ namespace nn {
     }
 
 
-    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* expected, double learningRate) {
+    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* expected, double learningRate, bool isOutputLayer) {
         int nr = this->numOutputs;
         int nc = this->numInputs;
         linalg::Matrix<double>* weightsMatrix = this->getWeights();
+        
+        double dwjk = 0.0;
+        if(isOutputLayer) {
+            for (int j = 0; j < nc; j++) {
+                
+            }
+        }
         
         double diffOut = 0.0;
         for (int i = 0; i < nr; i++) {
@@ -162,6 +170,18 @@ namespace nn {
         return this->getInput();
     }
 
+    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* expected, linalg::Matrix<double>* inp, double learningRate, bool isOutputLayer) {
+
+        int nr = this->numOutputs;
+        int nc = this->numInputs;
+        linalg::Matrix<double>* weightsMatrix = this->getWeights();
+
+        if(isOutputLayer) {
+        }
+        
+        return this->getInput();
+        
+    }
 
     NeuralNet::NeuralNet(int** conf, int nl) :configurazione(conf), numOfLayers(nl) {
         /*
@@ -200,9 +220,9 @@ namespace nn {
             }
             
             // error back propagation
-            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.05);
+            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.05, true);
             for(int j = this->layers->size() - 2; j>=0; --j) {
-                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05);
+                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05, false);
             }
 
             
