@@ -41,17 +41,17 @@ namespace nn {
         
         FullyConnected(int ni, int no, double(*activ)(double));
 
-        
-        
         void init(int ni, int no);
 
+        int getNumInputs();
+        int getNumOutputs();
+        
         linalg::Matrix<double>* getWeights();
         linalg::Matrix<double>* getInput();
         linalg::Matrix<double>* getOutput();
 
         linalg::Matrix<double>* feedForward(linalg::Matrix<double>* input);
         linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, double learningRate, bool isOutputLayer);
-        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, linalg::Matrix<double>* inp, double learningRate, bool isOutputLayer);
 
     };
 
@@ -70,6 +70,13 @@ namespace nn {
 
     };
 
+    int FullyConnected::getNumInputs() {
+        return this->numInputs;
+    }
+
+    int FullyConnected::getNumOutputs() {
+        return this->numOutputs;
+    }
 
     void FullyConnected::init(int ni, int no) {
         this->numInputs = ni;
@@ -170,19 +177,6 @@ namespace nn {
         return this->getInput();
     }
 
-    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* expected, linalg::Matrix<double>* inp, double learningRate, bool isOutputLayer) {
-
-        int nr = this->numOutputs;
-        int nc = this->numInputs;
-        linalg::Matrix<double>* weightsMatrix = this->getWeights();
-
-        if(isOutputLayer) {
-        }
-        
-        return this->getInput();
-        
-    }
-
     NeuralNet::NeuralNet(int** conf, int nl) :configurazione(conf), numOfLayers(nl) {
         /*
          [[ni1,no1],[ni2,no2],...,[nik,nok]]
@@ -210,17 +204,28 @@ namespace nn {
             linalg::Matrix<linalg::Matrix<double>*>* sampleIO = trainingSet->getElements()[0][i];
 
             linalg::Matrix<double>* x = sampleIO->getElements()[0][0];
-            linalg::Matrix<double>* y = sampleIO->getElements()[0][1];
+            linalg::Matrix<double>* t = sampleIO->getElements()[0][1];
 
             // forward phase
             linalg::Matrix<double>* yTemp = this->layers->front()->feedForward(x);
             
-            for(int i = 1; i < this->layers->size(); ++i) {
+            int l = this->layers->size() - 1;
+            for(int i = 1; i <= l; ++i) {
                 yTemp = this->layers->at(i)->feedForward(yTemp);    
             }
             
+            // compute local gradients vector of outputlayer
+            int no = this->layers->at(l)->getNumOutputs();
+            linalg::Matrix<double>* o = this->layers->at(l)->getOutput();
+            double* deltaL = new double[no];
+            for(int j = no; j < no; j++) {
+                double oj = o->getElements()[0][j];
+                double tj = t->getElements()[0][j];
+                deltaL[i] = (oj - tj)*oj*(1 - oj);
+            }
+            
             // error back propagation
-            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(y, 0.05, true);
+            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(t, 0.05, true);
             for(int j = this->layers->size() - 2; j>=0; --j) {
                 xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05, false);
             }
