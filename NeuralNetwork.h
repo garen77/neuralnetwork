@@ -232,7 +232,7 @@ namespace nn {
             // error back propagation
             linalg::Matrix<double>* deltaL = this->layers->back()->backPropagate(deltaLnext, 0.05);
             for(int j = this->layers->size() - 2; j>=0; --j) {
-                deltaL = this->layers->at(i)->backPropagate(deltaL, 0.05, false);
+                deltaL = this->layers->at(i)->backPropagate(deltaL, 0.05);
             }
 
             
