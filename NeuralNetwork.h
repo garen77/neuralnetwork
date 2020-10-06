@@ -51,7 +51,7 @@ namespace nn {
         linalg::Matrix<double>* getOutput();
 
         linalg::Matrix<double>* feedForward(linalg::Matrix<double>* input);
-        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* expected, double learningRate, bool isOutputLayer);
+        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* deltaLnext, double learningRate);
 
     };
 
@@ -142,32 +142,36 @@ namespace nn {
     }
 
 
-    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* expected, double learningRate, bool isOutputLayer) {
+    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* deltaLnext, double learningRate) {
         int nr = this->numOutputs;
         int nc = this->numInputs;
         linalg::Matrix<double>* weightsMatrix = this->getWeights();
         
-        double dwjk = 0.0;
-        if(isOutputLayer) {
-            for (int j = 0; j < nc; j++) {
-                
+        // Wt * deltaLnext
+        linalg::Matrix<double>* wLtraspDeltaLnext = new linalg::Matrix<double>(linalg::MatrixType::Numeric, nc, 1);
+        for (int j=0; j<nc; j++) {
+            double wLdLnext = 0;
+            for (int i=0; i<nr; i++) {
+                wLdLnext += deltaLnext->getElements()[i][0] * weightsMatrix->getElements()[i][j];
             }
+            wLtraspDeltaLnext->getElements()[0][j] = wLdLnext;
         }
         
-        double diffOut = 0.0;
-        for (int i = 0; i < nr; i++) {
-            diffOut += expected->getElements()[0][i] - this->output->getElements()[0][i];
+        // derivative of l-th output layer (this->getInput())
+        linalg::Matrix<double>* zL = this->getInput();
+        linalg::Matrix<double>* derSigmaZL = new linalg::Matrix<double>(linalg::MatrixType::Numeric, nc, 1);
+        for (int j=0; j<nc; j++) {
+            double zLj = zL->getElements()[j][0];
+            derSigmaZL->getElements()[j][0] = zLj * (1 - zLj);
         }
-        for (int i = 0; i < nr; i++) {
-            double o = this->output->getElements()[0][i];
-            for (int j = 0; j < nc; j++) {
-                double w = weightsMatrix->getElements()[i][j];
-                double x = this->input->getElements()[j][0];
-                
-                w = w - learningRate * diffOut * x * o * (1 - o);
-                weightsMatrix->getElements()[i][j] = w;
-            }
+        // Wt * deltaLnext product wise derivative of l-th output layer
+        linalg::Matrix<double>* deltaL = new linalg::Matrix<double>(linalg::MatrixType::Numeric, nc, 1);
+        for (int j=0; j<nc; j++) {
+            double wLtraspDeltaLnextj = wLtraspDeltaLnext->getElements()[j][0];
+            double derSigmaZLj = derSigmaZL->getElements()[j][0];
+            deltaL->getElements()[j][0] = wLtraspDeltaLnextj * derSigmaZLj;
         }
+        
         if (isLogActive) {
             std::cout << "\nback propagation";
             std::cout << this->getWeights();
@@ -217,17 +221,18 @@ namespace nn {
             // compute local gradients vector of outputlayer
             int no = this->layers->at(l)->getNumOutputs();
             linalg::Matrix<double>* o = this->layers->at(l)->getOutput();
-            double* deltaL = new double[no];
+            
+            linalg::Matrix<double>* deltaLnext = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, 1);
             for(int j = no; j < no; j++) {
                 double oj = o->getElements()[0][j];
                 double tj = t->getElements()[0][j];
-                deltaL[i] = (oj - tj)*oj*(1 - oj);
+                deltaLnext->getElements()[j][0] = (oj - tj)*oj*(1 - oj);
             }
             
             // error back propagation
-            linalg::Matrix<double>* xTemp = this->layers->back()->backPropagate(t, 0.05, true);
+            linalg::Matrix<double>* deltaL = this->layers->back()->backPropagate(deltaLnext, 0.05);
             for(int j = this->layers->size() - 2; j>=0; --j) {
-                xTemp = this->layers->at(i)->backPropagate(xTemp, 0.05, false);
+                deltaL = this->layers->at(i)->backPropagate(deltaL, 0.05, false);
             }
 
             
