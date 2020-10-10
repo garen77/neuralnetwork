@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cstdlib>
 
+using namespace linearalgebra;
+
 bool isLogActive = true;
 
 double relu(double inp) {
@@ -19,6 +21,21 @@ double linear(double inp) {
 
 double sigmoid(double inp) {
     return 1/(1 + std::exp(-inp));
+}
+
+namespace neuralnetworks {
+
+    class Neuron {
+    
+    private:
+        double* w;
+        double* x;
+        
+    public:
+        
+        
+    };
+    
 }
 
 namespace nn {
