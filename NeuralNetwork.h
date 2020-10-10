@@ -254,8 +254,9 @@ namespace nn {
             for(int j = this->layers->size() - 2; j>=0; --j) {
                 deltaL = this->layers->at(i)->backPropagate(deltaL);
             }
-            double learningRate = 0.05;
+            
             // weights update
+            double learningRate = 0.05;
             for(int l = this->layers->size() - 1; l>=0; --l) {
                 FullyConnected* layer = this->layers->at(l);
                 int nr = layer->getNumOutputs();
