@@ -132,3 +132,109 @@ namespace linalg {
     }
 
 }
+
+namespace linearalgebra {
+    
+    class Matrix {
+        private:
+            int numRows;
+            int numCols;
+            double** elements;
+
+
+        public:
+            Matrix(int nr, int nc);
+            Matrix(double** elems, int nr, int nc);
+            
+            double** getElements();
+            int getNumRows(void);
+            int getNumCols(void);
+
+            void print(void);
+
+
+        friend Matrix* operator*(Matrix& a, Matrix& b) {
+            int nr = a.getNumRows();
+            int nc = b.getNumCols();
+            int nca = a.getNumCols();
+            int nrb = b.getNumRows();
+            
+            linearalgebra::Matrix* res = new linearalgebra::Matrix(nr, nc);
+            if (nca == nrb) {
+                for (int i = 0; i < nr; i++) {
+                    for (int j = 0; j < nc; j++) {
+                        double sp = 0.0;
+                        for (int jj = 0; jj < nrb; jj++) {
+                            sp += a.getElements()[i][jj] * b.getElements()[jj][j];
+                        }
+                        res->elements[i][j] = sp;
+                    }
+                }
+            }
+
+            return res;
+
+        }
+
+        friend std::ostream& operator<<(std::ostream& strm, const Matrix* m) {
+            
+            strm << "\nMatrix: \n";
+            for (int i = 0; i < m->numRows; i++) {
+                for (int j = 0; j < m->numCols; j++) {
+                    strm << "[" << i << "][" << j << "] = " << m->elements[i][j] << " ";
+                }
+                strm << "\n";
+            }
+            
+            return strm;
+        }
+        
+    };
+
+    Matrix::Matrix(int nr, int nc): numRows(nr), numCols(nc) {
+        
+        this->elements = new double* [numRows];
+        for (int i = 0; i < numRows; i++) {
+            this->elements[i] = new double[numCols];
+            for (int j = 0; j < numCols; j++) {
+                /*if (this->type == MatrixType::Numeric) {
+                    this->elements[i][j] = 0.0;
+                }*/
+            }
+        }
+    }
+
+    Matrix::Matrix(double** elems, int nr, int nc): numRows(nr), numCols(nc) {
+        this->elements = new double* [numRows];
+        for (int i = 0; i < numRows; i++) {
+            this->elements[i] = new double[numCols];
+            for (int j = 0; j < numCols; j++) {
+                this->elements[i][j] = elems[i][j];
+            }
+        }
+    }
+
+    double** Matrix::getElements() {
+        return this->elements;
+    }
+
+    int Matrix::getNumRows() {
+        return numRows;
+    }
+
+    int Matrix::getNumCols() {
+        return numCols;
+    }
+
+    void Matrix::print(void) {
+        std::cout << "\nMatrix: \n";
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                std::cout << "[" << i << "][" << j << "] = " << this->elements[i][j] << " ";
+            }
+            std::cout << "\n";
+        }
+    }
+
+}
+
