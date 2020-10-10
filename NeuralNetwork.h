@@ -32,6 +32,9 @@ namespace nn {
         linalg::Matrix<double>* output;
         linalg::Matrix<double>* biases;
         
+        linalg::Matrix<double>* dCdW;
+        linalg::Matrix<double>* dCdb;
+        
         FullyConnected* previousLayer;
         double(*activation)(double inp);
         
@@ -51,7 +54,7 @@ namespace nn {
         linalg::Matrix<double>* getOutput();
 
         linalg::Matrix<double>* feedForward(linalg::Matrix<double>* input);
-        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* deltaLnext, double learningRate);
+        linalg::Matrix<double>* backPropagate(linalg::Matrix<double>* deltaLnext);
 
     };
 
@@ -142,7 +145,8 @@ namespace nn {
     }
 
 
-    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* deltaLnext, double learningRate) {
+    linalg::Matrix<double>* FullyConnected::backPropagate(linalg::Matrix<double>* deltaLnext) {
+        
         int nr = this->numOutputs;
         int nc = this->numInputs;
         linalg::Matrix<double>* weightsMatrix = this->getWeights();
@@ -172,13 +176,29 @@ namespace nn {
             deltaL->getElements()[j][0] = wLtraspDeltaLnextj * derSigmaZLj;
         }
         
+        this->dCdW = new linalg::Matrix<double>(linalg::MatrixType::Numeric, nr, nc);
+        this->dCdb= new linalg::Matrix<double>(linalg::MatrixType::Numeric, nr, 1);
+        
+        for (int i=0; i<nr; i++) {
+            double outputi = this->getOutput()->getElements()[i][0];
+            for (int j=0; j<nc; j++) {
+                double deltaLj = deltaL->getElements()[j][0];
+                this->dCdW->getElements()[i][j] = deltaLj * outputi;
+            }
+        }
+        
+        for (int i=0; i<nr; i++) {
+            this->dCdb->getElements()[i][0] = deltaL->getElements()[i][0];
+        }
+        
+        
         if (isLogActive) {
             std::cout << "\nback propagation";
             std::cout << this->getWeights();
         }
 
 
-        return this->getInput();
+        return deltaL;
     }
 
     NeuralNet::NeuralNet(int** conf, int nl) :configurazione(conf), numOfLayers(nl) {
@@ -230,11 +250,23 @@ namespace nn {
             }
             
             // error back propagation
-            linalg::Matrix<double>* deltaL = this->layers->back()->backPropagate(deltaLnext, 0.05);
+            linalg::Matrix<double>* deltaL = this->layers->back()->backPropagate(deltaLnext);
             for(int j = this->layers->size() - 2; j>=0; --j) {
-                deltaL = this->layers->at(i)->backPropagate(deltaL, 0.05);
+                deltaL = this->layers->at(i)->backPropagate(deltaL);
             }
-
+            double learningRate = 0.05;
+            // weights update
+            for(int l = this->layers->size() - 1; l>=0; --l) {
+                FullyConnected* layer = this->layers->at(l);
+                int nr = layer->getNumOutputs();
+                int nc = layer->getNumInputs();
+                for (int i=0; i<nr; i++) {
+                    for (int j=0; j<nc; j++) {
+                        double w = layer->getWeights()->getElements()[i][j];
+                        layer->getWeights()->getElements()[i][j] = w - learningRate * w;
+                    }
+                }
+            }
             
         }
     }
