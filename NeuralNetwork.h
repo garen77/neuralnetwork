@@ -129,7 +129,7 @@ public:
     int getNumOutputs();
     double** getWeights();
     double* feedForward(double* input);
-    double* backPropagate(double* deltaLnext, double** wLNext, int nrNext, double*zL);
+    double* backPropagate(double* deltaLnext, double** wLNext, int nrNext, double*outL, int nrPrevious, double* outPrevious);
     
 };
 
@@ -196,7 +196,7 @@ double* FullyConnected::feedForward(double* input) {
     return o;
 }
 
-double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int nrNext, double* outL) {
+double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int nrNext, double* outL, double* outPrevious) {
     
     int nr = this->numOutputs;
     int nc = this->numInputs;
@@ -208,22 +208,22 @@ double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int n
         for (int i=0; i<nrNext; i++) {
             wLnextDeltaLnext += deltaLnext[i] * wLNext[i][j];
         }
-        wLtraspDeltaLnext[j] = wLdLnext;
+        wLtraspDeltaLnext[j] = wLnextDeltaLnext;
     }
     
     // derivative of l-th output layer (this->getInput())
-    double* derSigmaOutL = new double[nc];
-    for (int j=0; j<nc; j++) {
-        double outLj = outL[j];
-        derSigmaOutL[j] = outLj * (1 - outLj);
+    double* derSigmaOutL = new double[nr];
+    for (int i=0; i<nr; i++) {
+        double outLi = outL[i];
+        derSigmaOutL[i] = outLi * (1 - outLi);
     }
     
     // Wt * deltaLnext product wise derivative of l-th output layer
-    double* deltaL = new double[nc];
-    for (int j=0; j<nc; j++) {
-        double wLtraspDeltaLnextj = wLtraspDeltaLnext[j];
-        double derSigmaOutLj = derSigmaOutL[j];
-        deltaL[j] = wLtraspDeltaLnextj * derSigmaOutLj;
+    double* deltaL = new double[nr];
+    for (int i=0; i<nr; i++) {
+        double wLtraspDeltaLnexti = wLtraspDeltaLnext[i];
+        double derSigmaOutLi = derSigmaOutL[i];
+        deltaL[i] = wLtraspDeltaLnexti * derSigmaOutLi;
     }
     
     this->dCdW = new double*[nr];
@@ -233,11 +233,10 @@ double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int n
     this->dCdb = new double[nr];
     
     for (int i=0; i<nr; i++) {
-        double outLi = outL[i];
-        double deltaLj = deltaL[j];
+        double deltaLi = deltaL[i];
         for (int j=0; j<nc; j++) {
-            double deltaLj = deltaL[j];
-            this->dCdW[i][j] = deltaLj * outLi;
+            double outPrevj = outPrevious[j];
+            this->dCdW[i][j] = deltaLi * outPrevj;
         }
     }
     
@@ -248,7 +247,6 @@ double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int n
     
     if (isLogActive) {
         std::cout << "\nback propagation";
-        std::cout << this->getWeights();
     }
 
 
