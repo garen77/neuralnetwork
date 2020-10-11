@@ -110,6 +110,150 @@ namespace neuralnetworks {
         return this->activation(res);
     }
 
+class FullyConnected {
+
+private:
+    int numInputs, numOutputs;
+    double** w;
+    double* b;
+    double** dCdW;
+    double* dCdb;
+    FullyConnected* previousLayer;
+    double(*activation)(double inp);
+    
+public:
+    FullyConnected(int ni, int no);
+    FullyConnected(int ni, int no, double(*activ)(double));
+    
+    int getNumInputs();
+    int getNumOutputs();
+    double** getWeights();
+    double* feedForward(double* input);
+    double* backPropagate(double* deltaLnext, double** wLNext, int nrNext, double*zL);
+    
+};
+
+int FullyConnected::getNumInputs() {
+    return this->numInputs;
+}
+
+int FullyConnected::getNumOutputs() {
+    return this->numOutputs;
+}
+
+FullyConnected::FullyConnected(int ni, int no) :numInputs(ni), numOutputs(no) {
+    this->activation = &sigmoid;
+    double** rows = new double*[no];
+    for(int i=0; i<no; i++) {
+        rows[i] = new double[ni];
+    }
+    this->w = rows;
+    this->b = new double[no];
+    
+    for (int i = 0; i < numOutputs; i++) {
+        for (int j = 0; j < numInputs; j++) {
+            this->w[i][j] = ((double) rand()) / (double) RAND_MAX;
+        }
+        this->b[i] = ((double) rand()) / (double) RAND_MAX;
+    }
+}
+
+double** FullyConnected::getWeights() {
+    return this->w;
+}
+
+double* FullyConnected::feedForward(double* input) {
+
+    //o = W*i
+    int nr = this->numOutputs;
+    int nc = this->numInputs;
+    double* o = new double[nr];
+    for (int i = 0; i < nr; i++) {
+        for (int j = 0; j < nc; j++) {
+            double sp = 0.0;
+            for (int jj = 0; jj < nr; jj++) {
+                sp += this->w[i][jj] * input[jj];
+            }
+            o[i] = sp;
+        }
+    }
+    
+    //o = o + b
+    for (int i=0; i<nr; i++) {
+        o[i] = o[i] + this->b[i];
+    }
+    
+    //o = activation(o)
+    for (int i=0; i<nr; i++) {
+        double z = o[i];
+        z = (this->activation)(z);//1/(1 + std::exp(-o));
+        if (isLogActive) {
+            std::cout << "\no=" << o << " i=" << i << "\n";
+        }
+        o[i] = z;
+    }
+
+    return o;
+}
+
+double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int nrNext, double* outL) {
+    
+    int nr = this->numOutputs;
+    int nc = this->numInputs;
+    
+    // WLnexTrasp * deltaLnext
+    double* wLtraspDeltaLnext = new double[nr];
+    for (int j=0; j<nr; j++) {
+        double wLnextDeltaLnext = 0;
+        for (int i=0; i<nrNext; i++) {
+            wLnextDeltaLnext += deltaLnext[i] * wLNext[i][j];
+        }
+        wLtraspDeltaLnext[j] = wLdLnext;
+    }
+    
+    // derivative of l-th output layer (this->getInput())
+    double* derSigmaOutL = new double[nc];
+    for (int j=0; j<nc; j++) {
+        double outLj = outL[j];
+        derSigmaOutL[j] = outLj * (1 - outLj);
+    }
+    
+    // Wt * deltaLnext product wise derivative of l-th output layer
+    double* deltaL = new double[nc];
+    for (int j=0; j<nc; j++) {
+        double wLtraspDeltaLnextj = wLtraspDeltaLnext[j];
+        double derSigmaOutLj = derSigmaOutL[j];
+        deltaL[j] = wLtraspDeltaLnextj * derSigmaOutLj;
+    }
+    
+    this->dCdW = new double*[nr];
+    for(int i=0; i<nr; i++) {
+        this->dCdW[i] = new double[nc];
+    }
+    this->dCdb = new double[nr];
+    
+    for (int i=0; i<nr; i++) {
+        double outLi = outL[i];
+        double deltaLj = deltaL[j];
+        for (int j=0; j<nc; j++) {
+            double deltaLj = deltaL[j];
+            this->dCdW[i][j] = deltaLj * outLi;
+        }
+    }
+    
+    for (int i=0; i<nr; i++) {
+        this->dCdb[i] = deltaL[i];
+    }
+    
+    
+    if (isLogActive) {
+        std::cout << "\nback propagation";
+        std::cout << this->getWeights();
+    }
+
+
+    return deltaL;
+}
 
 }
 
