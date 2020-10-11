@@ -23,19 +23,94 @@ double sigmoid(double inp) {
     return 1/(1 + std::exp(-inp));
 }
 
+double heaviside(double inp) {
+    if(inp < 0) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+
 namespace neuralnetworks {
 
     class Neuron {
     
     private:
+
+        int numInputs;
         double* w;
-        double* x;
+        double b;
         
     public:
         
+        Neuron(int n);
+        Neuron(int n, double(*activ)(double));
+        
+        int getNumInputs();
+        double* getWeights();
+        double getBias();
+        double(*activation)(double inp);
+        double output(double* x);
+        
+        void print();
         
     };
+
+    Neuron::Neuron(int n) :numInputs(n) {
+        this->w = new double[n];
+        this->activation = &heaviside;
+        for(int i=0; i<n; i++) {
+            this->w[i] = ((double) rand()) / (double) RAND_MAX;
+        }
+        this->b = ((double) rand()) / (double) RAND_MAX;
+    }
+
+    Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
+        this->w = new double[n];
+        this->activation = activ;
+        for(int i=0; i<n; i++) {
+            this->w[i] = ((double) rand()) / (double) RAND_MAX;
+        }
+        this->b = ((double) rand()) / (double) RAND_MAX;
+    }
     
+    int Neuron::getNumInputs() {
+        return this->numInputs;
+    }
+
+    double* Neuron::getWeights() {
+        return this->w;
+    }
+    
+    double Neuron::getBias() {
+        return this->b;
+    }
+
+    void Neuron::print() {
+        std::cout << "w=[";
+        int n = this->numInputs;
+        for(int i=0; i<n; i++) {
+            std::cout << this->w[i];
+            if(i != n-1) {
+                std::cout << ",";
+            }
+        }
+        std::cout << "] b="<<this->b<<"\n";
+        
+    }
+
+    double Neuron::output(double* x) {
+        int n = this->numInputs;
+        double res = 0.0;
+        for(int i=0; i<n; i++) {
+            res += x[i] * this->w[i];
+        }
+        res += this->b;
+        return this->activation(res);
+    }
+
+
 }
 
 namespace nn {
