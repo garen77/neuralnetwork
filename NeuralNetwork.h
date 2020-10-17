@@ -297,27 +297,34 @@ void NeuralNet::learn(double*** trainingSet, int numOfSamples) {
         double* t = sampleIO[1];
 
         // forward phase
+        int l = this->layers->size();
+        double** outputs = new double*[l];
         double* o = this->layers->front()->feedForward(x);
-        
-        int l = this->layers->size() - 1;
-        for(int i = 1; i <= l; ++i) {
+        outputs[0] = o;
+        for(int i = 1; i < l; ++i) {
             o = this->layers->at(i)->feedForward(o);
+            outputs[i] = o;
         }
         
         // compute local gradients vector of outputlayer
         int no = this->layers->at(l)->getNumOutputs();
         
-        linalg::Matrix<double>* deltaLnext = new linalg::Matrix<double>(linalg::MatrixType::Numeric, no, 1);
+        double* deltaLnext = new double[no];
         for(int j = no; j < no; j++) {
             double oj = o[j];
             double tj = t[j];
-            deltaLnext->getElements()[j][0] = (oj - tj)*oj*(1 - oj);
+            deltaLnext[j] = (oj - tj)*oj*(1 - oj);
         }
-        
+        //double* deltaLnext, double** wLNext, int nrNext, double* outL, double* outPrevious
+        double** wLnext = this->layers->at(l)->getWeights();
+        int nrNext = this->layers->at(l)->getNumOutputs();
         // error back propagation
-        linalg::Matrix<double>* deltaL = this->layers->back()->backPropagate(deltaLnext);
-        for(int j = this->layers->size() - 2; j>=0; --j) {
-            deltaL = this->layers->at(i)->backPropagate(deltaL);
+        deltaLnext = this->layers->back()->backPropagate(deltaLnext, wLnext, nrNext, o, outputs[l-2]);
+        for(int j = this->layers->size() - 2; j>=1; --j) {
+            FullyConnected* layer = this->layers->at(i);
+            wLnext = layer->getWeights();
+            nrNext = layer->getNumOutputs();
+            deltaLnext = layer->backPropagate(deltaLnext, wLnext, nrNext, outputs[j], outputs[j-1]);
         }
         
         // weights update
