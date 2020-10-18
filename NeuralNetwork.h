@@ -60,19 +60,20 @@ namespace neuralnetworks {
     Neuron::Neuron(int n) :numInputs(n) {
         this->w = new double[n];
         this->activation = &heaviside;
+        
         for(int i=0; i<n; i++) {
-            this->w[i] = ((double) rand()) / (double) RAND_MAX;
+            this->w[i] = (((double) rand()) / (double) RAND_MAX) * (100 +100) - 100;
         }
-        this->b = ((double) rand()) / (double) RAND_MAX;
+        this->b = (((double) rand()) / (double) RAND_MAX) * (100 +100) - 100;
     }
 
     Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
         this->w = new double[n];
         this->activation = activ;
         for(int i=0; i<n; i++) {
-            this->w[i] = ((double) rand()) / (double) RAND_MAX;
+            this->w[i] = (((double) rand()) / (double) RAND_MAX) * (100 +100) - 100;
         }
-        this->b = ((double) rand()) / (double) RAND_MAX;
+        this->b = (((double) rand()) / (double) RAND_MAX) * (100 +100) - 100;
     }
     
     int Neuron::getNumInputs() {
@@ -155,9 +156,16 @@ namespace neuralnetworks {
         
         for (int i = 0; i < numOutputs; i++) {
             for (int j = 0; j < numInputs; j++) {
-                this->w[i][j] = ((double) rand()) / (double) RAND_MAX;
+                this->w[i][j] = (((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1;
+                if (isLogActive) {
+                    std::cout << "\nw["<<i<<"]["<<j<<"] = "<<w[i][j];
+                }
             }
-            this->b[i] = ((double) rand()) / (double) RAND_MAX;
+            if (isLogActive) {
+                std::cout << "\n";
+            }
+            
+            this->b[i] = (((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1;
         }
     }
 
@@ -179,23 +187,61 @@ namespace neuralnetworks {
 
     double* FullyConnected::feedForward(double* input) {
 
+        if (isLogActive) {
+            std::cout << "\nfeed forwad - start";
+        }
+
         //o = W*i
         int nr = this->numOutputs;
         int nc = this->numInputs;
         double* o = new double[nr];
-        for (int i = 0; i < nr; i++) {
+        
+        for (int k = 0; k < nr; k++) {
+            for (int i = 0; i < nr; i++) {
+                double sp = 0.0;
+                for (int j = 0; j < nc; j++) {
+                    double w = this->w[i][j];
+                    if (isLogActive) {
+                         std::cout << "\nw["<<i<<"]["<<j<<"] = "<<w;
+                         std::cout << "\nx["<<j<<"] = "<<input[j];
+                     }
+                    sp += w * input[j];
+                }
+            }
+            if (isLogActive) {
+                std::cout << "\n";
+            }
+        }
+        
+        
+        /*for (int i = 0; i < nr; i++) {
             for (int j = 0; j < nc; j++) {
                 double sp = 0.0;
                 for (int jj = 0; jj < nr; jj++) {
-                    sp += this->w[i][jj] * input[jj];
+                    double w = this->w[i][jj];
+                    if (isLogActive) {
+                        std::cout << "\nw["<<i<<"]["<<jj<<"] = "<<w;
+                        std::cout << "\nx["<<jj<<"] = "<<input[jj];
+                    }
+                    
+                    sp += w * input[jj];
+                }
+                if (isLogActive) {
+                    std::cout << "\nsp["<<i<<"] = "<<sp;
                 }
                 o[i] = sp;
             }
-        }
+            if (isLogActive) {
+                std::cout << "\n";
+            }
+        }*/
         
         //o = o + b
         for (int i=0; i<nr; i++) {
             o[i] = o[i] + this->b[i];
+            if (isLogActive) {
+                std::cout << "\nb["<<i<<"]=" << this->b[i]<<"\n";
+            }
         }
         
         //o = activation(o)
@@ -203,16 +249,23 @@ namespace neuralnetworks {
             double z = o[i];
             z = (this->activation)(z);//1/(1 + std::exp(-o));
             if (isLogActive) {
-                std::cout << "\no=" << o << " i=" << i << "\n";
+                std::cout << "\no["<<i<<"]=" << z << " i=" << i << "\n";
             }
             o[i] = z;
         }
 
+        if (isLogActive) {
+            std::cout << "\nfeed forwad - end";
+        }
+        
         return o;
     }
 
     double* FullyConnected::backPropagate(double* deltaLnext, double** wLNext, int nrNext, double* outL, double* outPrevious) {
         
+        if (isLogActive) {
+            std::cout << "\nback propagation - start";
+        }
         int nr = this->numOutputs;
         int nc = this->numInputs;
         
@@ -222,8 +275,12 @@ namespace neuralnetworks {
             double wLnextDeltaLnext = 0;
             for (int i=0; i<nrNext; i++) {
                 wLnextDeltaLnext += deltaLnext[i] * wLNext[i][j];
+                if (isLogActive) {
+                    std::cout << "\ndeltaLnext[i] = "<<deltaLnext[i]<<" wLNext[i][j] = "<<wLNext[i][j];
+                }
             }
             wLtraspDeltaLnext[j] = wLnextDeltaLnext;
+
         }
         
         // derivative of l-th output layer (this->getInput())
@@ -239,6 +296,9 @@ namespace neuralnetworks {
             double wLtraspDeltaLnexti = wLtraspDeltaLnext[i];
             double derSigmaOutLi = derSigmaOutL[i];
             deltaL[i] = wLtraspDeltaLnexti * derSigmaOutLi;
+            if (isLogActive) {
+                std::cout << "\nwLtraspDeltaLnexti = "<<wLtraspDeltaLnexti<<" derSigmaOutLi = "<<derSigmaOutLi;
+            }
         }
         
         this->dCdW = new double*[nr];
@@ -247,12 +307,18 @@ namespace neuralnetworks {
         }
         this->dCdb = new double[nr];
         
+        
         for (int i=0; i<nr; i++) {
             double deltaLi = deltaL[i];
             for (int j=0; j<nc; j++) {
                 double outPrevj = outPrevious[j];
                 this->dCdW[i][j] = deltaLi * outPrevj;
+                if (isLogActive) {
+                    std::cout << "\noutPrevj = "<<outPrevj<<" deltaLi = "<<deltaLi;
+                    std::cout << "\ndCdW["<<i<<"]["<<j<<"]="<<this->dCdW[i][j]<<" ";
+                }
             }
+            std::cout << "\n";
         }
         
         for (int i=0; i<nr; i++) {
@@ -261,7 +327,7 @@ namespace neuralnetworks {
         
         
         if (isLogActive) {
-            std::cout << "\nback propagation";
+            std::cout << "\nback propagation - end";
         }
 
 
@@ -278,8 +344,7 @@ namespace neuralnetworks {
     public:
         NeuralNet(int** conf, int nl);
 
-        void learn(double*** trainingSet, int numOfSamples);
-        void learn(linalg::Matrix<linalg::Matrix<linalg::Matrix<double>*>*>* trainingSet);
+        void learn(double*** trainingSet, int numOfSamples, int numOfEpochs);
         double* fit(double* x);
 
     };
@@ -294,75 +359,103 @@ namespace neuralnetworks {
         for (int i = 0; i < nl; i++) {
             int ni = this->configurazione[i][0];
             int no = this->configurazione[i][1];
-            FullyConnected* fc = new FullyConnected(ni, no);
+            FullyConnected* fc = new FullyConnected(ni, no );
             this->layers->push_back(fc);
         }
     }
 
-    void NeuralNet::learn(double*** trainingSet, int numOfSamples) {
+    void NeuralNet::learn(double*** trainingSet, int numOfSamples, int numOfEpochs) {
         /*
          training set
          [[[x1],[y1]],[[x2],[y2]],...,[[xn],[yn]]]
          */
-        for (int i = 0; i < numOfSamples; i++) {
-            
-            double** sampleIO = trainingSet[i];
+        if (isLogActive) {
+            std::cout << "\nlearn - start";
+        }
+        for(int e=0; e<numOfEpochs; e++) {
+            for (int i = 0; i < numOfSamples; i++) {
+                
+                double** sampleIO = trainingSet[i];
 
-            double* x = sampleIO[0];
-            double* t = sampleIO[1];
+                double* x = sampleIO[0];
+                double* t = sampleIO[1];
 
-            // forward phase
-            int l = this->layers->size();
-            double** outputs = new double*[l];
-            double* o = this->layers->front()->feedForward(x);
-            outputs[0] = o;
-            for(int i = 1; i < l; ++i) {
-                o = this->layers->at(i)->feedForward(o);
-                outputs[i] = o;
-            }
-            
-            // compute local gradients vector of outputlayer
-            int no = this->layers->at(l)->getNumOutputs();
-            
-            double* deltaLnext = new double[no];
-            for(int j = no; j < no; j++) {
-                double oj = o[j];
-                double tj = t[j];
-                deltaLnext[j] = (oj - tj)*oj*(1 - oj);
-            }
-            //double* deltaLnext, double** wLNext, int nrNext, double* outL, double* outPrevious
-            double** wLnext = this->layers->at(l)->getWeights();
-            int nrNext = this->layers->at(l)->getNumOutputs();
-            // error back propagation
-            deltaLnext = this->layers->back()->backPropagate(deltaLnext, wLnext, nrNext, o, outputs[l-2]);
-            for(int j = this->layers->size() - 2; j>=1; --j) {
-                FullyConnected* layer = this->layers->at(i);
-                wLnext = layer->getWeights();
-                nrNext = layer->getNumOutputs();
-                deltaLnext = layer->backPropagate(deltaLnext, wLnext, nrNext, outputs[j], outputs[j-1]);
-            }
-            
-            // weights update
-            double learningRate = 0.05;
-            for(int l = this->layers->size() - 1; l>=0; --l) {
-                FullyConnected* layer = this->layers->at(l);
-                int nr = layer->getNumOutputs();
-                int nc = layer->getNumInputs();
-                for (int i=0; i<nr; i++) {
-                    double b = layer->getBiases()[i];
-                    double dBdW = layer->getdBdW()[i];
-                    layer->getBiases()[i] = b - learningRate * dBdW;
-                    for (int j=0; j<nc; j++) {
-                        double w = layer->getWeights()[i][j];
-                        double dCdW = layer->getdCdW()[i][j];
-                        layer->getWeights()[i][j] = w - learningRate * dCdW;
+                // forward phase
+                int l = this->layers->size();
+                double** outputs = new double*[l + 1];
+                double* o = x;
+                outputs[0] = x;
+                for(int i = 0; i < l; ++i) {
+                    o = this->layers->at(i)->feedForward(o);
+                    outputs[i + 1] = o;
+                }
+                
+
+                
+                // compute local gradients vector of outputlayer
+                int no = this->layers->at(l - 1)->getNumOutputs();
+                if (isLogActive) {
+                    std::cout << "\nno = "<<no<<"\n";
+                }
+                double* deltaLnext = new double[no];
+                for(int j = 0; j < no; j++) {
+                    double oj = o[j];
+                    double tj = t[j];
+                    deltaLnext[j] = (oj - tj)*oj*(1 - oj);
+                    if (isLogActive) {
+                        std::cout << "\noj = "<<oj<<" tj = "<<tj<<"\n";
                     }
                 }
+                //double* deltaLnext, double** wLNext, int nrNext, double* outL, double* outPrevious
+                double** wLnext = this->layers->at(l - 1)->getWeights();
+                int nrNext = this->layers->at(l - 1)->getNumOutputs();
+                // error back propagation
+                deltaLnext = this->layers->back()->backPropagate(deltaLnext, wLnext, nrNext, o, outputs[l-1]);
+                for(int j = l - 2; j>=1; --j) {
+                    FullyConnected* layer = this->layers->at(i);
+                    wLnext = layer->getWeights();
+                    nrNext = layer->getNumOutputs();
+                    deltaLnext = layer->backPropagate(deltaLnext, wLnext, nrNext, outputs[j], outputs[j-1]);
+                }
+                
+                // weights update
+                double learningRate = 0.001;
+                for(int l = this->layers->size() - 1; l>=0; --l) {
+                    if (isLogActive) {
+                        std::cout << "\nweights update\n";
+                    }
+                    FullyConnected* layer = this->layers->at(l);
+                    int nr = layer->getNumOutputs();
+                    int nc = layer->getNumInputs();
+                    for (int i=0; i<nr; i++) {
+                        double b = layer->getBiases()[i];
+                        double dBdW = layer->getdBdW()[i];
+                        layer->getBiases()[i] = b - learningRate * dBdW;
+                        for (int j=0; j<nc; j++) {
+                            double w = layer->getWeights()[i][j];
+                            double dCdW = layer->getdCdW()[i][j];
+                            layer->getWeights()[i][j] = w - learningRate * dCdW;
+                            if (isLogActive) {
+                                std::cout << "\nw = "<<w<<", dCdW =  "<<dCdW<<"\n";
+                            }
+                        }
+                    }
+                }
+                
             }
-            
+        }
+        if (isLogActive) {
+            std::cout << "\nlearn - end";
         }
     }
 
+    double* NeuralNet::fit(double* x) {
+        double* y = NULL;
+        for (std::vector<FullyConnected*>::iterator it = this->layers->begin(); it != this->layers->end(); ++it) {
+            y = (*it)->feedForward(x);
+        }
+        return y;
+    }
 
 }
 
