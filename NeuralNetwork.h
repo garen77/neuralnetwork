@@ -6,6 +6,7 @@
 #include "LinearAlgebra.h"
 #include <cmath>
 #include <cstdlib>
+#include <unordered_map>
 
 using namespace linearalgebra;
 
@@ -166,6 +167,9 @@ namespace neuralnetworks {
             }
             
             this->b[i] = (((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1;
+            if (isLogActive) {
+                std::cout << "\nb["<<i<<"] = "<<this->b[i];
+            }
         }
     }
 
@@ -207,34 +211,12 @@ namespace neuralnetworks {
                      }
                     sp += w * input[j];
                 }
-            }
-            if (isLogActive) {
-                std::cout << "\n";
-            }
-        }
-        
-        
-        /*for (int i = 0; i < nr; i++) {
-            for (int j = 0; j < nc; j++) {
-                double sp = 0.0;
-                for (int jj = 0; jj < nr; jj++) {
-                    double w = this->w[i][jj];
-                    if (isLogActive) {
-                        std::cout << "\nw["<<i<<"]["<<jj<<"] = "<<w;
-                        std::cout << "\nx["<<jj<<"] = "<<input[jj];
-                    }
-                    
-                    sp += w * input[jj];
-                }
-                if (isLogActive) {
-                    std::cout << "\nsp["<<i<<"] = "<<sp;
-                }
                 o[i] = sp;
             }
             if (isLogActive) {
                 std::cout << "\n";
             }
-        }*/
+        }
         
         //o = o + b
         for (int i=0; i<nr; i++) {
@@ -419,7 +401,8 @@ namespace neuralnetworks {
                 }
                 
                 // weights update
-                double learningRate = 0.001;
+                double learningRate = 0.01;
+
                 for(int l = this->layers->size() - 1; l>=0; --l) {
                     if (isLogActive) {
                         std::cout << "\nweights update\n";
@@ -431,12 +414,13 @@ namespace neuralnetworks {
                         double b = layer->getBiases()[i];
                         double dBdW = layer->getdBdW()[i];
                         layer->getBiases()[i] = b - learningRate * dBdW;
+
                         for (int j=0; j<nc; j++) {
                             double w = layer->getWeights()[i][j];
                             double dCdW = layer->getdCdW()[i][j];
                             layer->getWeights()[i][j] = w - learningRate * dCdW;
                             if (isLogActive) {
-                                std::cout << "\nw = "<<w<<", dCdW =  "<<dCdW<<"\n";
+                                std::cout << "w = "<<w<<", dCdW =  "<<dCdW<<", "<<"dBdW = "<<dBdW<<"\n";
                             }
                         }
                     }
@@ -455,6 +439,36 @@ namespace neuralnetworks {
             y = (*it)->feedForward(x);
         }
         return y;
+    }
+
+    class NeuralNetwork {
+
+    private:
+        std::vector<std::unordered_map<std::string, double>*>* layers;
+        int numOfLayers;
+        int** configurazione;
+
+    public:
+        NeuralNetwork(int** conf, int nl);
+
+        void learn(double*** trainingSet, int numOfSamples, int numOfEpochs);
+        double* fit(double* x);
+
+    };
+
+    NeuralNetwork::NeuralNetwork(int** conf, int nl) :configurazione(conf), numOfLayers(nl) {
+        /*
+         [[ni1,no1],[ni2,no2],...,[nik,nok]]
+        */
+       
+        this->layers = new std::vector<std::unordered_map<std::string, double>*>();
+        this->layers->reserve(nl);
+        for (int i = 0; i < nl; i++) {
+            int ni = this->configurazione[i][0];
+            int no = this->configurazione[i][1];
+            std::unordered_map<std::string, double>* layer = new std::unordered_map<std::string, double>();
+            this->layers->push_back(layer);
+        }
     }
 
 }
