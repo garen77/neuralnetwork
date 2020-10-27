@@ -446,17 +446,18 @@ namespace neuralnetworks {
     private:
         std::vector<std::unordered_map<std::string, double>*>* layers;
         int numOfLayers;
-        int** configurazione;
+        int* configurazione;
 
     public:
-        NeuralNetwork(int** conf, int nl);
+        NeuralNetwork(int* conf, int nl);
 
         void learn(double*** trainingSet, int numOfSamples, int numOfEpochs);
         double* fit(double* x);
 
     };
 
-    NeuralNetwork::NeuralNetwork(int** conf, int nl) :configurazione(conf), numOfLayers(nl) {
+    NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
+        
         /*
          [[ni1,no1],[ni2,no2],...,[nik,nok]]
         */
@@ -464,8 +465,8 @@ namespace neuralnetworks {
         this->layers = new std::vector<std::unordered_map<std::string, double>*>();
         this->layers->reserve(nl);
         for (int i = 0; i < nl; i++) {
-            int ni = this->configurazione[i][0];
-            int no = this->configurazione[i][1];
+            int numWeights = this->configurazione[i];
+            
             std::unordered_map<std::string, double>* layer = new std::unordered_map<std::string, double>();
             this->layers->push_back(layer);
         }
