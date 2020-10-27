@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 using namespace linearalgebra;
+using namespace std;
 
 bool isLogActive = true;
 
@@ -444,13 +445,16 @@ namespace neuralnetworks {
     class NeuralNetwork {
 
     private:
-        std::vector<std::unordered_map<std::string, double>*>* layers;
+        //vector<vector<unordered_map<string,vector<double>*>*>*>* layers;
+        
+        unordered_map<string,double*>*** layers;
         int numOfLayers;
         int* configurazione;
 
     public:
         NeuralNetwork(int* conf, int nl);
 
+        double activate(double* weights, double* inputs, int n);
         void learn(double*** trainingSet, int numOfSamples, int numOfEpochs);
         double* fit(double* x);
 
@@ -459,17 +463,40 @@ namespace neuralnetworks {
     NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
         
         /*
-         [[ni1,no1],[ni2,no2],...,[nik,nok]]
+         nl : num layers
+         [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
         */
        
-        this->layers = new std::vector<std::unordered_map<std::string, double>*>();
-        this->layers->reserve(nl);
-        for (int i = 0; i < nl; i++) {
-            int numWeights = this->configurazione[i];
+        this->layers = new unordered_map<string,double*>**[nl];
+        
+        for (int l = 1; l < nl + 1; l++) {
+            int numInputs = this->configurazione[l-1];
+            int numOutputs = this->configurazione[l];
             
-            std::unordered_map<std::string, double>* layer = new std::unordered_map<std::string, double>();
-            this->layers->push_back(layer);
+            unordered_map<string,double*>** layer = new unordered_map<string,double*>*[numOutputs];
+            
+            for (int i=0; i<numOutputs; i++) {
+                unordered_map<string,double*>* neuron = new unordered_map<string,double*>();
+                double* weights = new double[numInputs];
+                for (int j=0; j<numInputs; j++) {
+                    weights[i] = (((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1;
+                }
+                neuron->emplace("weights",weights);
+                layer[i] = neuron;
+            }
+            
+            this->layers[l-1] = layer;
+            
         }
+    }
+
+    double activate(double* weights, double* inputs, int n) {
+        double sum = 0.0;
+        for (int i=0; i<n; i++) {
+            sum += weights[i]*inputs[i];
+        }
+        sum += weights[n];
+        return sigmoid(sum);
     }
 
 }
