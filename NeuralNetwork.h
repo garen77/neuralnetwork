@@ -481,7 +481,7 @@ namespace neuralnetworks {
                 for (int j=0; j<numInputs; j++) {
                     weights[i] = (((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1;
                 }
-                neuron->emplace("weights",weights);
+                (*neuron)["weights"]=weights;
                 layer[i] = neuron;
             }
             
@@ -490,7 +490,7 @@ namespace neuralnetworks {
         }
     }
 
-    double activate(double* weights, double* inputs, int n) {
+    double NeuralNetwork::activate(double* weights, double* inputs, int n) {
         double sum = 0.0;
         for (int i=0; i<n; i++) {
             sum += weights[i]*inputs[i];
