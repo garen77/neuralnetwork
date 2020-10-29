@@ -445,18 +445,17 @@ namespace neuralnetworks {
     class NeuralNetwork {
 
     private:
-        //vector<vector<unordered_map<string,vector<double>*>*>*>* layers;
+        vector<vector<unordered_map<string,vector<double>*>*>*>* layers;
         
-        unordered_map<string,double*>*** layers;
         int numOfLayers;
         int* configurazione;
 
     public:
         NeuralNetwork(int* conf, int nl);
 
-        double activate(double* weights, double* inputs, int n);
-        void learn(double*** trainingSet, int numOfSamples, int numOfEpochs);
-        double* fit(double* x);
+        double activate(vector<double>* weights, vector<double>* inputs);
+        void forwardPropagate(vector<double>* inputs);
+
 
     };
 
@@ -467,36 +466,58 @@ namespace neuralnetworks {
          [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
         */
        
-        this->layers = new unordered_map<string,double*>**[nl];
-        
+        this->layers = new vector<vector<unordered_map<string,vector<double>*>*>*>();
+        this->layers->reserve(nl);
         for (int l = 1; l < nl + 1; l++) {
             int numInputs = this->configurazione[l-1];
             int numOutputs = this->configurazione[l];
             
-            unordered_map<string,double*>** layer = new unordered_map<string,double*>*[numOutputs];
+            vector<unordered_map<string,vector<double>*>*>* layer = new vector<unordered_map<string,vector<double>*>*>();
+            layer->reserve(numOutputs);
             
             for (int i=0; i<numOutputs; i++) {
-                unordered_map<string,double*>* neuron = new unordered_map<string,double*>();
-                double* weights = new double[numInputs];
+                unordered_map<string,vector<double>*>* neuron = new unordered_map<string,vector<double>*>();
+                vector<double>* weights = new vector<double>();
+                weights->reserve(numInputs + 1);
                 for (int j=0; j<numInputs; j++) {
-                    weights[i] = (((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1;
+                    weights->push_back((((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1);
                 }
-                (*neuron)["weights"]=weights;
-                layer[i] = neuron;
+                weights->push_back((((double) rand()) / (double) RAND_MAX) * (1 + 1) - 1);
+                (*neuron)["weights"] = weights;
+                layer->push_back(neuron);
             }
             
-            this->layers[l-1] = layer;
+            this->layers->push_back(layer);
             
         }
     }
 
-    double NeuralNetwork::activate(double* weights, double* inputs, int n) {
+    double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {
         double sum = 0.0;
-        for (int i=0; i<n; i++) {
-            sum += weights[i]*inputs[i];
+        int wSize = weights->size();
+        for (int i=0; i<wSize; i++) {
+            sum += weights->at(i)*inputs->at(i);
         }
-        sum += weights[n];
+        sum += weights->at(wSize); // bias sum
         return sigmoid(sum);
+    }
+
+    void NeuralNetwork::forwardPropagate(vector<double>* inputs) {
+        vector<double>* currInputs = new vector<double>(*inputs);
+        for(int l=0; l<this->numOfLayers; l++) {
+            vector<unordered_map<string,vector<double>*>*>* layer = this->layers->at(l);
+            int layerSize = layer->size();
+            vector<double>* newInputs = new vector<double>();
+            for(int n=0; n<layerSize; n++) {
+                unordered_map<string,vector<double>*>* neuron = layer->at(n);
+                double neuronOut = this->activate((*neuron)["weights"],currInputs);
+                (*neuron)["output"] = new vector<double>();
+                (*neuron)["output"]->reserve(1);
+                (*neuron)["output"]->push_back(neuronOut);
+            }
+            
+        }
+        
     }
 
 }
