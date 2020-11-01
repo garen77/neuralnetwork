@@ -445,7 +445,7 @@ namespace neuralnetworks {
     class NeuralNetwork {
 
     private:
-        vector<vector<unordered_map<string,vector<double>*>*>*>* layers;
+        vector<vector<unordered_map<string,void*>*>*>* layers;
         
         int numOfLayers;
         int* configurazione;
@@ -455,7 +455,9 @@ namespace neuralnetworks {
 
         double activate(vector<double>* weights, vector<double>* inputs);
         void forwardPropagate(vector<double>* inputs);
-
+        void backPropagate(vector<double>* expected);
+        
+        void updateWeights(vector<double>* inputs, double lr);
 
     };
 
@@ -466,17 +468,17 @@ namespace neuralnetworks {
          [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
         */
        
-        this->layers = new vector<vector<unordered_map<string,vector<double>*>*>*>();
+        this->layers = new vector<vector<unordered_map<string,void*>*>*>();
         this->layers->reserve(nl);
         for (int l = 1; l < nl + 1; l++) {
             int numInputs = this->configurazione[l-1];
             int numOutputs = this->configurazione[l];
             
-            vector<unordered_map<string,vector<double>*>*>* layer = new vector<unordered_map<string,vector<double>*>*>();
+            vector<unordered_map<string,void*>*>* layer = new vector<unordered_map<string,void*>*>();
             layer->reserve(numOutputs);
             
             for (int i=0; i<numOutputs; i++) {
-                unordered_map<string,vector<double>*>* neuron = new unordered_map<string,vector<double>*>();
+                unordered_map<string,void*>* neuron = new unordered_map<string,void*>();
                 vector<double>* weights = new vector<double>();
                 weights->reserve(numInputs + 1);
                 for (int j=0; j<numInputs; j++) {
@@ -505,19 +507,83 @@ namespace neuralnetworks {
     void NeuralNetwork::forwardPropagate(vector<double>* inputs) {
         vector<double>* currInputs = new vector<double>(*inputs);
         for(int l=0; l<this->numOfLayers; l++) {
-            vector<unordered_map<string,vector<double>*>*>* layer = this->layers->at(l);
+            vector<unordered_map<string,void*>*>* layer = this->layers->at(l);
             int layerSize = layer->size();
             vector<double>* newInputs = new vector<double>();
+            newInputs->reserve(layerSize);
             for(int n=0; n<layerSize; n++) {
-                unordered_map<string,vector<double>*>* neuron = layer->at(n);
-                double neuronOut = this->activate((*neuron)["weights"],currInputs);
-                (*neuron)["output"] = new vector<double>();
-                (*neuron)["output"]->reserve(1);
-                (*neuron)["output"]->push_back(neuronOut);
+                unordered_map<string,void*>* neuron = layer->at(n);
+                double neuronOut = this->activate(static_cast<vector<double>*>((*neuron)["weights"]),currInputs);
+                *(double *)(*neuron)["output"] = neuronOut;
+                newInputs->push_back(neuronOut);
             }
-            
+            delete currInputs;
+            currInputs = newInputs;
         }
+    }
+
+    void NeuralNetwork::backPropagate(vector<double>* expected) {
         
+        for(int i=this->numOfLayers-1; i>=0; i--) {
+            vector<unordered_map<string,void*>*>* layer = this->layers->at(i);
+            int layerSize = layer->size();
+            vector<double>* errors = new vector<double>();
+            errors->reserve(layerSize);
+            if(i !=  this->numOfLayers - 1) {
+                for (int j=0; j<layerSize; j++) {
+                    double error = 0.0;
+                    vector<unordered_map<string,void*>*>* nextLayer = this->layers->at(i+1);
+                    int nextLayerSize = nextLayer->size();
+                    for (int n=0; n<nextLayerSize; n++) {
+                        unordered_map<string,void*>* neuron = layer->at(n);
+                        vector<double>* w = static_cast<vector<double>*>((*neuron)["weights"]);
+                        error += w->at(j) * (*(double *)(*neuron)["delta"]) ;
+                    }
+                    errors->push_back(error);
+                }
+            } else {
+                for (int j=0; j<layerSize; j++) {
+                    unordered_map<string,void*>* neuron = layer->at(j);
+                    errors->push_back(expected->at(j) - (*(double *)(*neuron)["output"]) );
+                    
+                }
+            }
+            for (int j=0; j<layerSize; j++) {
+                unordered_map<string,void*>* neuron = layer->at(j);
+                double neuronOut = *(double *)(*neuron)["output"];
+                *(double *)(*neuron)["delta"] = errors->at(j)*neuronOut*(1-neuronOut);
+            }
+        }
+    }
+
+    void NeuralNetwork::updateWeights(vector<double>* inputs, double lr) {
+        vector<double>* currInputs = new vector<double>(*inputs);
+        for (int i=0; i<this->numOfLayers; i++) {
+            vector<unordered_map<string,void*>*>* layer = this->layers->at(i);
+            int layerSize = layer->size();
+            if(i!=0) {
+                vector<unordered_map<string,void*>*>* previousLayer = this->layers->at(i-1);
+                int previuosLayerSize = previousLayer->size();
+                currInputs = new vector<double>();
+                currInputs->reserve(previuosLayerSize);
+                for (int j=0; j<previuosLayerSize; j++) {
+                    unordered_map<string,void*>* neuron = previousLayer->at(j);
+                    double neuronOut = *(double *)(*neuron)["output"];
+                    currInputs->push_back(neuronOut);
+                }
+            } else {
+                for (int n=0; n<layerSize; n++) {
+                    unordered_map<string,void*>* neuron = layer->at(n);
+                    int currInputsSize = currInputs->size();
+                    vector<double>* w = static_cast<vector<double>*>((*neuron)["weights"]);
+                    double neuronDelta = *(double *)(*neuron)["delta"];
+                    for (int j=0; j<currInputsSize; j++) {
+                        w->at(j) = lr*currInputs->at(j)*neuronDelta;
+                    }
+                    w->at(currInputsSize) = lr*neuronDelta;
+                }
+            }
+        }
     }
 
 }
