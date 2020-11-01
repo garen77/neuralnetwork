@@ -454,10 +454,11 @@ namespace neuralnetworks {
         NeuralNetwork(int* conf, int nl);
 
         double activate(vector<double>* weights, vector<double>* inputs);
-        void forwardPropagate(vector<double>* inputs);
+        vector<double>* forwardPropagate(vector<double>* inputs);
         void backPropagate(vector<double>* expected);
-        
         void updateWeights(vector<double>* inputs, double lr);
+        
+        void trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs);
 
     };
 
@@ -504,7 +505,7 @@ namespace neuralnetworks {
         return sigmoid(sum);
     }
 
-    void NeuralNetwork::forwardPropagate(vector<double>* inputs) {
+    vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
         vector<double>* currInputs = new vector<double>(*inputs);
         for(int l=0; l<this->numOfLayers; l++) {
             vector<unordered_map<string,void*>*>* layer = this->layers->at(l);
@@ -520,6 +521,7 @@ namespace neuralnetworks {
             delete currInputs;
             currInputs = newInputs;
         }
+        return currInputs;
     }
 
     void NeuralNetwork::backPropagate(vector<double>* expected) {
@@ -582,6 +584,23 @@ namespace neuralnetworks {
                     }
                     w->at(currInputsSize) = lr*neuronDelta;
                 }
+            }
+        }
+    }
+
+    void NeuralNetwork::trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs) {
+        for(int epoch=0; epoch<numEpochs; epoch++) {
+            double sumError = 0.0;
+            int trainintSetSize = trainingSet->size();
+            for (int i=0; i<trainintSetSize; i++) {
+                vector<double>* row = trainingSet->at(i);
+                int inputsSize = row->size()-1;
+                vector<double>* inputs = new vector<double>();
+                inputs->reserve(inputsSize-1);
+                for(int j=0; j<inputsSize; j++) {
+                    inputs->push_back(row->at(j));
+                }
+                vector<double>* outputs = this->forwardPropagate(inputs);
             }
         }
     }
