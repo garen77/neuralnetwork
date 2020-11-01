@@ -460,6 +460,7 @@ namespace neuralnetworks {
         
         void trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs);
 
+        int fit(vector<double>* inputs);
     };
 
     NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
@@ -601,10 +602,40 @@ namespace neuralnetworks {
                     inputs->push_back(row->at(j));
                 }
                 vector<double>* outputs = this->forwardPropagate(inputs);
+                vector<double>* expected = new vector<double>();
+                expected->reserve(numOutputs);
+                for(int j=0; j<numOutputs; j++) {
+                    expected->at(j) = 0.0;
+                }
+                expected->at(row->at(inputsSize)) = 1;
+                for(int k=0; k<numOutputs; k++) {
+                    sumError += pow((expected->at(k) - outputs->at(k)), 2);
+                }
             }
+            cout<<"\nepoch = "<<epoch<<", learning rate = "<<lr<<", error = "<<sumError<<"\n";
         }
     }
 
+    int NeuralNetwork::fit(vector<double>* inputs) {
+        vector<double>* outputs = this->forwardPropagate(inputs);
+        vector<unordered_map<string,void*>*>* outLayer = this->layers->at(this->layers->size()-1);
+        int numOutputs = outLayer->size();
+        unordered_map<string,void*>* neuron = outLayer->at(0);
+        double maxOut = *(double *)(*neuron)["output"];
+        for(int n=1; n<numOutputs; n++) {
+            unordered_map<string,void*>* neuron = outLayer->at(n);
+            double neuronOut = *(double *)(*neuron)["output"];
+            if(neuronOut > maxOut) {
+                maxOut = neuronOut;
+            }
+        }
+        vector<double>::iterator it = find(outputs->begin(), outputs->end(), maxOut);
+        if(it != outputs->end()) {
+            return it - outputs->begin();
+        } else {
+            return -1;
+        }
+    }
 }
 
 namespace nn {
