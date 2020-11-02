@@ -498,11 +498,11 @@ namespace neuralnetworks {
 
     double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {
         double sum = 0.0;
-        int wSize = weights->size();
-        for (int i=0; i<wSize; i++) {
+        int inputSize = inputs->size();
+        for (int i=0; i<inputSize; i++) {
             sum += weights->at(i)*inputs->at(i);
         }
-        sum += weights->at(wSize); // bias sum
+        sum += weights->at(inputSize); // bias sum
         return sigmoid(sum);
     }
 
@@ -516,7 +516,9 @@ namespace neuralnetworks {
             for(int n=0; n<layerSize; n++) {
                 unordered_map<string,void*>* neuron = layer->at(n);
                 double neuronOut = this->activate(static_cast<vector<double>*>((*neuron)["weights"]),currInputs);
-                *(double *)(*neuron)["output"] = neuronOut;
+                //*(double *)(*neuron)["output"] = neuronOut;
+                double* pNeuronOut = &neuronOut;
+                (*neuron)["output"] = pNeuronOut;
                 newInputs->push_back(neuronOut);
             }
             delete currInputs;
