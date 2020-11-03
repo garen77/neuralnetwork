@@ -11,7 +11,7 @@
 using namespace linearalgebra;
 using namespace std;
 
-bool isLogActive = true;
+bool isLogActive = false;
 
 double relu(double inp) {
     return inp > 0 ? inp : 0;
@@ -512,7 +512,9 @@ namespace neuralnetworks {
         }
         vector<double>* currInputs = new vector<double>(*inputs);
         for(int l=0; l<this->numOfLayers; l++) {
-            cout<<"\nlayer "<<l;
+            if(isLogActive) {
+                cout<<"\nlayer "<<l;
+            }
             vector<unordered_map<string,void*>*>* layer = this->layers->at(l);
             int layerSize = layer->size();
             vector<double>* newInputs = new vector<double>();
@@ -520,8 +522,8 @@ namespace neuralnetworks {
             for(int n=0; n<layerSize; n++) {
                 unordered_map<string,void*>* neuron = layer->at(n);
                 double neuronOut = this->activate(static_cast<vector<double>*>((*neuron)["weights"]),currInputs);
-                //*(double *)(*neuron)["output"] = neuronOut;
-                double* pNeuronOut = &neuronOut;
+                double *pNeuronOut = new double[1];
+                pNeuronOut[0] = neuronOut;
                 (*neuron)["output"] = pNeuronOut;
                 newInputs->push_back(neuronOut);
                 if(isLogActive){
@@ -539,7 +541,9 @@ namespace neuralnetworks {
             cout<<"\nBackpropagate\n";
         }
         for(int i=this->numOfLayers-1; i>=0; i--) {
-            cout<<"\nlayer "<<i;
+            if(isLogActive) {
+                cout<<"\nlayer "<<i;
+            }
             vector<unordered_map<string,void*>*>* layer = this->layers->at(i);
             int layerSize = layer->size();
             vector<double>* errors = new vector<double>();
@@ -552,7 +556,7 @@ namespace neuralnetworks {
                     for (int n=0; n<nextLayerSize; n++) {
                         unordered_map<string,void*>* neuron = nextLayer->at(n);
                         vector<double>* w = static_cast<vector<double>*>((*neuron)["weights"]);
-                        double neuronDelta = *(double *)(*neuron)["delta"];
+                        double neuronDelta = ((double *)(*neuron)["delta"])[0];
                         error += w->at(j) * neuronDelta;
                     }
                     errors->push_back(error);
@@ -561,20 +565,21 @@ namespace neuralnetworks {
                 for (int j=0; j<layerSize; j++) {
                     unordered_map<string,void*>* neuron = layer->at(j);
                     errors->push_back(expected->at(j) - (*(double *)(*neuron)["output"]));
-                    if(isLogActive){
-                        cout<<"\nexpected["<<j<<"]="<<expected->at(j)<<" out="<<(*(double *)(*neuron)["output"]);
+                    if(isLogActive) {
+                        cout<<"\nexpected["<<j<<"]="<<expected->at(j)<<" out from map="<<((double *)(*neuron)["output"])[0];
                     }
                 }
             }
             for (int j=0; j<layerSize; j++) {
                 unordered_map<string,void*>* neuron = layer->at(j);
-                double neuronOut = *(double *)(*neuron)["output"];
+                double neuronOut = ((double *)(*neuron)["output"])[0];
                 double neuronDelta = errors->at(j)*neuronOut*(1-neuronOut);
-                double* pNeuronDelta = &neuronDelta;
+                double* pNeuronDelta = new double[1];
+                pNeuronDelta[0] = neuronDelta;
                 (*neuron)["delta"] = pNeuronDelta;
-                if(isLogActive){
+                if(isLogActive) {
                     cout<<"\nneuronDelta ="<<neuronDelta;
-                    cout<<"\nfrom map="<<(*(double *)(*neuron)["delta"]);
+                    cout<<"\nfrom map="<<((double *)(*neuron)["delta"])[0];
                 }
             }
         }
@@ -604,14 +609,21 @@ namespace neuralnetworks {
                 int currInputsSize = currInputs->size();
                 vector<double>* w = static_cast<vector<double>*>((*neuron)["weights"]);
                 double neuronDelta = *(double *)(*neuron)["delta"];
-                cout<<"\nLayer "<<n;
+                if(isLogActive) {
+                    cout<<"\nLayer "<<n;
+                }
                 for (int j=0; j<currInputsSize; j++) {
-                    
-                    cout<<"\n w["<<j<<"]="<<w->at(j)<<" pre update";
+                    if(isLogActive) {
+                        cout<<"\n w["<<j<<"]="<<w->at(j)<<" pre update";
+                    }
                     double wUpdated = w->at(j) + lr*currInputs->at(j)*neuronDelta;
-                    cout<<"\n currInp["<<j<<"]="<<currInputs->at(j)<<" delta="<<neuronDelta;
+                    if(isLogActive) {
+                        cout<<"\n currInp["<<j<<"]="<<currInputs->at(j)<<" delta="<<neuronDelta;
+                    }
                     w->at(j) += lr*currInputs->at(j)*neuronDelta;
-                    cout<<"\n w["<<j<<"]="<<w->at(j)<<" post update\n";
+                    if(isLogActive) {
+                        cout<<"\n w["<<j<<"]="<<w->at(j)<<" post update\n";
+                    }
                 }
                 w->at(currInputsSize) += lr*neuronDelta;
             }
