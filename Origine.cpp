@@ -110,6 +110,8 @@ int main() {
     inps = new vector<double>{0,0};
     o = network->fit(inps);
     cout<<"\nexpected = 0 out = "<<o<<"\n";
+    
+    cout<<"\n-----end------\n";
 }
 
 
