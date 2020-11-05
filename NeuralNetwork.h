@@ -7,6 +7,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <unordered_map>
+#include <iostream>
+
+using std::cout;
 
 
 using namespace std;

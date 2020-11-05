@@ -4,11 +4,9 @@
  *  Created on: 24/gen/2019
  *      Author: cgarofalo
  */
-#include "Funzioni.h"
 //#include "Classi.h"
 //#include "LinearAlgebra.h"
 #include "NeuralNetwork.h"
-
 
 using namespace neuralnetworks;
 
