@@ -181,7 +181,7 @@ namespace neuralnetworks {
     }
 
     vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
-        if(isLogActive){
+        if(isLogActive) {
             cout<<"\nForwardpropagate\n";
         }
         vector<double>* currInputs = new vector<double>(*inputs);
@@ -317,7 +317,6 @@ namespace neuralnetworks {
                 
                 for(int j=0; j<inputsSize; j++) {
                     inputs->push_back(row->at(j));
-                    
                 }
                 vector<double>* outputs = this->forwardPropagate(inputs);
                 vector<double>* expected = new vector<double>();
@@ -333,7 +332,9 @@ namespace neuralnetworks {
                 this->backPropagate(expected);
                 this->updateWeights(inputs, lr);
             }
-            cout<<"\nepoch = "<<epoch<<", learning rate = "<<lr<<", error = "<<sumError<<"\n";
+            if (isLogActive) {
+                cout << "\nepoch = " << epoch << ", learning rate = " << lr << ", error = " << sumError << "\n";
+            }
         }
     }
 

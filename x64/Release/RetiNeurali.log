@@ -8,16 +8,16 @@ C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(272,62): wa
 C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(283,56): warning C4267: 'inizializzazione': conversione da 'size_t' a 'int'. Possibile perdita di dati.
 C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(311,54): warning C4267: 'inizializzazione': conversione da 'size_t' a 'int'. Possibile perdita di dati.
 C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(314,47): warning C4267: 'inizializzazione': conversione da 'size_t' a 'int'. Possibile perdita di dati.
-C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(328,37): warning C4244: 'argomento': conversione da '_Ty' a 'const unsigned __int64'. Possibile perdita di dati.
+C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(327,37): warning C4244: 'argomento': conversione da '_Ty' a 'const unsigned __int64'. Possibile perdita di dati.
           with
           [
               _Ty=double
           ]
-C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(343,42): warning C4267: 'inizializzazione': conversione da 'size_t' a 'int'. Possibile perdita di dati.
-C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(355,23): warning C4244: 'return': conversione da '__int64' a 'int'. Possibile perdita di dati.
+C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(344,42): warning C4267: 'inizializzazione': conversione da 'size_t' a 'int'. Possibile perdita di dati.
+C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\NeuralNetwork.h(356,23): warning C4244: 'return': conversione da '__int64' a 'int'. Possibile perdita di dati.
   Generazione codice in corso...
-  444 of 457 functions (97.2%) were compiled, the rest were copied from previous compilation.
-    328 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+  1 of 457 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   Generazione codice terminata
   RetiNeurali.vcxproj -> C:\Users\crescenzo.garofalo\source\repos\RetiNeurali\x64\Release\RetiNeurali.exe
