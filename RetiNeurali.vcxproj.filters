@@ -24,9 +24,15 @@
     <ClInclude Include="LinearAlgebra.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="nn.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Origine.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="nn.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

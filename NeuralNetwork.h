@@ -39,7 +39,7 @@ double heaviside(double inp) {
 
 namespace neuralnetworks {
 
-    class Neuron {
+    /*class Neuron {
     
     private:
 
@@ -114,7 +114,7 @@ namespace neuralnetworks {
         }
         res += this->b;
         return this->activation(res);
-    }
+    }*/
 
     class NeuralNetwork {
 
