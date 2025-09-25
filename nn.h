@@ -1,6 +1,35 @@
 #pragma once
 
+#include <vector>
+#include <cmath>
+#include <cstdlib>
+#include <unordered_map>
+#include <iostream>
 
+using namespace std;
+
+bool isLogActive = false;
+
+double relu(double inp) {
+    return inp > 0 ? inp : 0;
+}
+
+double linear(double inp) {
+    return inp;
+}
+
+double sigmoid(double inp) {
+    return 1 / (1 + std::exp(-inp));
+}
+
+double heaviside(double inp) {
+    if (inp < 0) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
 
 namespace neuralnetworks {
 
@@ -25,6 +54,27 @@ namespace neuralnetworks {
 
         void print();
 
+    };
+
+    class NeuralNetwork {
+
+    private:
+        vector<vector<unordered_map<string, void*>*>*>* layers;
+
+        int numOfLayers;
+        int* configurazione;
+
+    public:
+        NeuralNetwork(int* conf, int nl);
+
+        double activate(vector<double>* weights, vector<double>* inputs);
+        vector<double>* forwardPropagate(vector<double>* inputs);
+        void backPropagate(vector<double>* expected);
+        void updateWeights(vector<double>* inputs, double lr);
+
+        void trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs);
+
+        int fit(vector<double>* inputs);
     };
 
 }
