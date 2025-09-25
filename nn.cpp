@@ -1,6 +1,27 @@
 #include "nn.h"
 
+bool isLogActive = false;
 
+double relu(double inp) {
+    return inp > 0 ? inp : 0;
+}
+
+double linear(double inp) {
+    return inp;
+}
+
+double sigmoid(double inp) {
+    return 1 / (1 + std::exp(-inp));
+}
+
+double heaviside(double inp) {
+    if (inp < 0) {
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
 
 neuralnetworks::Neuron::Neuron(int n) :numInputs(n) {
     this->w = new double[n];

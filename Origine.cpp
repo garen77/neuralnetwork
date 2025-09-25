@@ -6,7 +6,7 @@
  */
 //#include "Classi.h"
 //#include "LinearAlgebra.h"
-#include "NeuralNetwork.h"
+#include "nn.h"
 
 using namespace neuralnetworks;
 
