@@ -148,7 +148,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="LinearAlgebra.h" />
-    <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="nn.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

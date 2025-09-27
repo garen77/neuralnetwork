@@ -1,5 +1,7 @@
 #include "nn.h"
 
+using namespace neuralnetworks;
+
 bool isLogActive = false;
 
 double relu(double inp) {
@@ -23,7 +25,7 @@ double heaviside(double inp) {
     }
 }
 
-neuralnetworks::Neuron::Neuron(int n) :numInputs(n) {
+Neuron::Neuron(int n) :numInputs(n) {
     this->w = new double[n];
     this->activation = &heaviside;
 
@@ -33,7 +35,7 @@ neuralnetworks::Neuron::Neuron(int n) :numInputs(n) {
     this->b = (((double)rand()) / (double)RAND_MAX) * (100 + 100) - 100;
 }
 
-neuralnetworks::Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
+Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
     this->w = new double[n];
     this->activation = activ;
     for (int i = 0; i < n; i++) {
@@ -42,19 +44,19 @@ neuralnetworks::Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
     this->b = (((double)rand()) / (double)RAND_MAX) * (100 + 100) - 100;
 }
 
-int neuralnetworks::Neuron::getNumInputs() {
+int Neuron::getNumInputs() {
     return this->numInputs;
 }
 
-double* neuralnetworks::Neuron::getWeights() {
+double* Neuron::getWeights() {
     return this->w;
 }
 
-double neuralnetworks::Neuron::getBias() {
+double Neuron::getBias() {
     return this->b;
 }
 
-void neuralnetworks::Neuron::print() {
+void Neuron::print() {
     std::cout << "w=[";
     int n = this->numInputs;
     for (int i = 0; i < n; i++) {
@@ -67,7 +69,7 @@ void neuralnetworks::Neuron::print() {
 
 }
 
-double neuralnetworks::Neuron::output(double* x) {
+double Neuron::output(double* x) {
     int n = this->numInputs;
     double res = 0.0;
     for (int i = 0; i < n; i++) {
@@ -79,7 +81,7 @@ double neuralnetworks::Neuron::output(double* x) {
 
 
 
-neuralnetworks::NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
+NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
 
     /*
      nl : num layers
@@ -112,7 +114,7 @@ neuralnetworks::NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(
     }
 }
 
-double neuralnetworks::NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {
+double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {
     double sum = 0.0;
     int inputSize = inputs->size();
     for (int i = 0; i < inputSize; i++) {
@@ -122,7 +124,7 @@ double neuralnetworks::NeuralNetwork::activate(vector<double>* weights, vector<d
     return sigmoid(sum);
 }
 
-vector<double>* neuralnetworks::NeuralNetwork::forwardPropagate(vector<double>* inputs) {
+vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
     if (isLogActive) {
         cout << "\nForwardpropagate\n";
     }
@@ -152,7 +154,7 @@ vector<double>* neuralnetworks::NeuralNetwork::forwardPropagate(vector<double>* 
     return currInputs;
 }
 
-void neuralnetworks::NeuralNetwork::backPropagate(vector<double>* expected) {
+void NeuralNetwork::backPropagate(vector<double>* expected) {
     if (isLogActive) {
         cout << "\nBackpropagate\n";
     }
@@ -202,7 +204,7 @@ void neuralnetworks::NeuralNetwork::backPropagate(vector<double>* expected) {
     }
 }
 
-void neuralnetworks::NeuralNetwork::updateWeights(vector<double>* inputs, double lr) {
+void NeuralNetwork::updateWeights(vector<double>* inputs, double lr) {
     if (isLogActive) {
         cout << "\n-update weights\n";
     }
@@ -248,7 +250,7 @@ void neuralnetworks::NeuralNetwork::updateWeights(vector<double>* inputs, double
     }
 }
 
-void neuralnetworks::NeuralNetwork::trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs) {
+void NeuralNetwork::trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs) {
     for (int epoch = 0; epoch < numEpochs; epoch++) {
         double sumError = 0.0;
         int trainintSetSize = trainingSet->size();
@@ -281,7 +283,7 @@ void neuralnetworks::NeuralNetwork::trainNetwork(vector<vector<double>*>* traini
     }
 }
 
-int neuralnetworks::NeuralNetwork::fit(vector<double>* inputs) {
+int NeuralNetwork::fit(vector<double>* inputs) {
     vector<double>* outputs = this->forwardPropagate(inputs);
     vector<unordered_map<string, void*>*>* outLayer = this->layers->at(this->layers->size() - 1);
     int numOutputs = outLayer->size();
