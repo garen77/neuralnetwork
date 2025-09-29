@@ -2,7 +2,7 @@
 
 using namespace neuralnetworks;
 
-bool isLogActive = false;
+bool isLogActive = true;
 
 double relu(double inp) {
     return inp > 0 ? inp : 0;
@@ -57,18 +57,28 @@ vector<double>* Neuron::getWeights() {
     return this->w;
 }
 
+double Neuron::getDelta() {
+    return this->delta;
+}
+
+void Neuron::setDelta(double delta) {
+    this->delta = delta;
+}
+
+double Neuron::getOutput() {
+    return this->output;
+}
 
 void Neuron::print() {
     std::cout << "w=[";
     int n = this->numInputs;
     for (int i = 0; i < n; i++) {
-        std::cout << this->w[i];
+        std::cout << this->w->at(i);
         if (i != n - 1) {
             std::cout << ",";
         }
     }
-    std::cout << "] b=" << this->b << "\n";
-
+    std::cout << "] b=" << this->w->at(n) << "\n";
 }
 
 double Neuron::activate(vector<double>* x) {
@@ -87,32 +97,14 @@ double Neuron::activate(vector<double>* x) {
 
 NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
 
-
     // nl : num layers
     // [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
 
-
-    //this->layers = new vector<vector<unordered_map<string, void*>*>*>();
     this->_layers = new vector<vector<Neuron*>*>();
     this->_layers->reserve(nl);
     for (int l = 1; l < nl + 1; l++) {
         int numInputs = this->configurazione[l - 1];
         int numOutputs = this->configurazione[l];
-
-        /*vector<unordered_map<string, void*>*>* layer = new vector<unordered_map<string, void*>*>();
-        layer->reserve(numOutputs);
-
-        for (int i = 0; i < numOutputs; i++) {
-            unordered_map<string, void*>* neuron = new unordered_map<string, void*>();
-            vector<double>* weights = new vector<double>();
-            weights->reserve(numInputs + 1);
-            for (int j = 0; j < numInputs; j++) {
-                weights->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
-            }
-            weights->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
-            (*neuron)["weights"] = weights;
-            layer->push_back(neuron);
-        }*/
 
         vector<Neuron*>* layer = new vector<Neuron*>();
         layer->reserve(numOutputs);
@@ -125,40 +117,6 @@ NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLaye
 
     }
 }
-
-/*
-NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
-
-    
-    // nl : num layers
-    // [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
-   
-
-    this->layers = new vector<vector<unordered_map<string, void*>*>*>();
-    this->layers->reserve(nl);
-    for (int l = 1; l < nl + 1; l++) {
-        int numInputs = this->configurazione[l - 1];
-        int numOutputs = this->configurazione[l];
-
-        vector<unordered_map<string, void*>*>* layer = new vector<unordered_map<string, void*>*>();
-        layer->reserve(numOutputs);
-
-        for (int i = 0; i < numOutputs; i++) {
-            unordered_map<string, void*>* neuron = new unordered_map<string, void*>();
-            vector<double>* weights = new vector<double>();
-            weights->reserve(numInputs + 1);
-            for (int j = 0; j < numInputs; j++) {
-                weights->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
-            }
-            weights->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
-            (*neuron)["weights"] = weights;
-            layer->push_back(neuron);
-        }
-
-        this->layers->push_back(layer);
-
-    }
-}*/
 
 double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {
     double sum = 0.0;
@@ -200,37 +158,6 @@ vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
     return currInputs;
 }
 
-/*
-vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
-    if (isLogActive) {
-        cout << "\nForwardpropagate\n";
-    }
-    vector<double>* currInputs = new vector<double>(*inputs);
-    for (int l = 0; l < this->numOfLayers; l++) {
-        if (isLogActive) {
-            cout << "\nlayer " << l;
-        }
-        vector<unordered_map<string, void*>*>* layer = this->layers->at(l);
-        int layerSize = layer->size();
-        vector<double>* newInputs = new vector<double>();
-        newInputs->reserve(layerSize);
-        for (int n = 0; n < layerSize; n++) {
-            unordered_map<string, void*>* neuron = layer->at(n);
-            double neuronOut = this->activate(static_cast<vector<double>*>((*neuron)["weights"]), currInputs);
-            double* pNeuronOut = new double[1];
-            pNeuronOut[0] = neuronOut;
-            (*neuron)["output"] = pNeuronOut;
-            newInputs->push_back(neuronOut);
-            if (isLogActive) {
-                cout << "\nneuronOut=" << neuronOut << " from map " << *(double*)(*neuron)["output"];
-            }
-        }
-        delete currInputs;
-        currInputs = newInputs;
-    }
-    return currInputs;
-}*/
-
 void NeuralNetwork::backPropagate(vector<double>* expected) {
     if (isLogActive) {
         cout << "\nBackpropagate\n";
@@ -239,19 +166,19 @@ void NeuralNetwork::backPropagate(vector<double>* expected) {
         if (isLogActive) {
             cout << "\nlayer " << i;
         }
-        vector<unordered_map<string, void*>*>* layer = this->layers->at(i);
+        vector<Neuron*>* layer = this->_layers->at(i);
         int layerSize = layer->size();
         vector<double>* errors = new vector<double>();
         errors->reserve(layerSize);
         if (i != this->numOfLayers - 1) {
             for (int j = 0; j < layerSize; j++) {
                 double error = 0.0;
-                vector<unordered_map<string, void*>*>* nextLayer = this->layers->at(i + 1);
+                vector<Neuron*>* nextLayer = this->_layers->at(i + 1);
                 int nextLayerSize = nextLayer->size();
                 for (int n = 0; n < nextLayerSize; n++) {
-                    unordered_map<string, void*>* neuron = nextLayer->at(n);
-                    vector<double>* w = static_cast<vector<double>*>((*neuron)["weights"]);
-                    double neuronDelta = ((double*)(*neuron)["delta"])[0];
+                    Neuron* neuron = nextLayer->at(n);
+                    vector<double>* w = neuron->getWeights();
+                    double neuronDelta = neuron->getDelta();
                     error += w->at(j) * neuronDelta;
                 }
                 errors->push_back(error);
@@ -259,23 +186,21 @@ void NeuralNetwork::backPropagate(vector<double>* expected) {
         }
         else {
             for (int j = 0; j < layerSize; j++) {
-                unordered_map<string, void*>* neuron = layer->at(j);
-                errors->push_back(expected->at(j) - (*(double*)(*neuron)["output"]));
+                Neuron* neuron = layer->at(j);
+                errors->push_back(expected->at(j) - neuron->getOutput());
                 if (isLogActive) {
-                    cout << "\nexpected[" << j << "]=" << expected->at(j) << " out from map=" << ((double*)(*neuron)["output"])[0];
+                    cout << "\nexpected[" << j << "]=" << expected->at(j) << " out from map=" << neuron->getOutput()<<endl;
                 }
             }
         }
         for (int j = 0; j < layerSize; j++) {
-            unordered_map<string, void*>* neuron = layer->at(j);
-            double neuronOut = ((double*)(*neuron)["output"])[0];
+            Neuron* neuron = layer->at(j);
+            double neuronOut = neuron->getOutput();
             double neuronDelta = errors->at(j) * neuronOut * (1 - neuronOut);
             double* pNeuronDelta = new double[1];
-            pNeuronDelta[0] = neuronDelta;
-            (*neuron)["delta"] = pNeuronDelta;
+            neuron->setDelta(neuronDelta);
             if (isLogActive) {
-                cout << "\nneuronDelta =" << neuronDelta;
-                cout << "\nfrom map=" << ((double*)(*neuron)["delta"])[0];
+                cout << "\nneuronDelta =" << neuronDelta<<endl;
             }
         }
     }
@@ -287,24 +212,24 @@ void NeuralNetwork::updateWeights(vector<double>* inputs, double lr) {
     }
     vector<double>* currInputs = new vector<double>(*inputs);
     for (int i = 0; i < this->numOfLayers; i++) {
-        vector<unordered_map<string, void*>*>* layer = this->layers->at(i);
+        vector<Neuron*>* layer = this->_layers->at(i);
         int layerSize = layer->size();
         if (i != 0) {
-            vector<unordered_map<string, void*>*>* previousLayer = this->layers->at(i - 1);
+            vector<Neuron*>* previousLayer = this->_layers->at(i - 1);
             int previuosLayerSize = previousLayer->size();
             currInputs = new vector<double>();
             currInputs->reserve(previuosLayerSize);
             for (int j = 0; j < previuosLayerSize; j++) {
-                unordered_map<string, void*>* neuron = previousLayer->at(j);
-                double neuronOut = *(double*)(*neuron)["output"];
+                Neuron* neuron = previousLayer->at(j);
+                double neuronOut = neuron->getOutput();
                 currInputs->push_back(neuronOut);
             }
         }
         for (int n = 0; n < layerSize; n++) {
-            unordered_map<string, void*>* neuron = layer->at(n);
+            Neuron* neuron = layer->at(n);
             int currInputsSize = currInputs->size();
-            vector<double>* w = static_cast<vector<double>*>((*neuron)["weights"]);
-            double neuronDelta = *(double*)(*neuron)["delta"];
+            vector<double>* w = neuron->getWeights();
+            double neuronDelta = neuron->getDelta();
             if (isLogActive) {
                 cout << "\nLayer " << n;
             }
@@ -362,13 +287,13 @@ void NeuralNetwork::trainNetwork(vector<vector<double>*>* trainingSet, double lr
 
 int NeuralNetwork::fit(vector<double>* inputs) {
     vector<double>* outputs = this->forwardPropagate(inputs);
-    vector<unordered_map<string, void*>*>* outLayer = this->layers->at(this->layers->size() - 1);
+    vector<Neuron*>* outLayer = this->_layers->at(this->_layers->size() - 1);
     int numOutputs = outLayer->size();
-    unordered_map<string, void*>* neuron = outLayer->at(0);
-    double maxOut = *(double*)(*neuron)["output"];
+    Neuron* neuron = outLayer->at(0);
+    double maxOut = neuron->getOutput();
     for (int n = 1; n < numOutputs; n++) {
-        unordered_map<string, void*>* neuron = outLayer->at(n);
-        double neuronOut = *(double*)(*neuron)["output"];
+        Neuron* neuron = outLayer->at(n);
+        double neuronOut = neuron->getOutput();
         if (neuronOut > maxOut) {
             maxOut = neuronOut;
         }

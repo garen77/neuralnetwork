@@ -17,6 +17,7 @@ namespace neuralnetworks {
 
         int numInputs;
         vector<double>* w;
+        double delta;
         double output;
 
     public:
@@ -26,6 +27,9 @@ namespace neuralnetworks {
 
         int getNumInputs();
         vector<double>* getWeights();
+        double getDelta();
+        void setDelta(double delta);
+        double getOutput();
         double(*activation)(double inp);
         double activate(vector<double>* x);
 

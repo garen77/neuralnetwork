@@ -65,11 +65,12 @@ int main() {
     int o = network->fit(inps);
     cout<<"\nFit\nexpected = 1 out = "<<o;
     free(inps);
+
     inps = new vector<double>{3.396561688,4.400293529};
     o = network->fit(inps);
     cout<<"\nFit\nexpected = 0 out = "<<o<<"\n";
     free(inps);
-    
+    /*
     cout<<"\nSecond train - xor\n";
     trainingSet->clear();
     trainingSet->push_back(new vector<double>{0,0,0});
@@ -186,7 +187,7 @@ int main() {
     inps = new vector<double>{ 0,0 };
     o = network->fit(inps);
     cout << "\nexpected = 1 out = " << o << "\n";
-
+    */
     cout<<"\n-----end------\n";
 }
 
