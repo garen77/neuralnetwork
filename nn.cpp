@@ -2,7 +2,7 @@
 
 using namespace neuralnetworks;
 
-bool isLogActive = true;
+bool isLogActive = false;
 
 double relu(double inp) {
     return inp > 0 ? inp : 0;
@@ -29,7 +29,7 @@ Neuron::Neuron(int n) :numInputs(n) {
     this->w = new vector<double>();
     this->w->reserve(numInputs + 1);
 
-    this->activation = &heaviside;
+    this->activation = &sigmoid;
 
     for (int j = 0; j < numInputs; j++) {
         this->w->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
@@ -90,8 +90,8 @@ double Neuron::activate(vector<double>* x) {
         sum += weights->at(i) * x->at(i);
     }
     sum += weights->at(inputSize); // bias sum
-    this->output = sum;
-    return this->activation(sum);
+    this->output = this->activation(sum);
+    return this->output;
 
 }
 
@@ -149,7 +149,7 @@ vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
             pNeuronOut[0] = neuronOut;
             newInputs->push_back(neuronOut);
             if (isLogActive) {
-                cout << "\nneuronOut=" << neuronOut << " from map "<<endl;
+                cout << "\nneuronOut=" << neuronOut << " from map "<<neuron->getOutput() << endl;
             }
         }
         delete currInputs;
