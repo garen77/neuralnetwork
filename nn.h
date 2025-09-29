@@ -16,8 +16,8 @@ namespace neuralnetworks {
     private:
 
         int numInputs;
-        double* w;
-        double b;
+        vector<double>* w;
+        double output;
 
     public:
 
@@ -25,10 +25,9 @@ namespace neuralnetworks {
         Neuron(int n, double(*activ)(double));
 
         int getNumInputs();
-        double* getWeights();
-        double getBias();
+        vector<double>* getWeights();
         double(*activation)(double inp);
-        double output(double* x);
+        double activate(vector<double>* x);
 
         void print();
 
@@ -38,6 +37,7 @@ namespace neuralnetworks {
 
     private:
         vector<vector<unordered_map<string, void*>*>*>* layers;
+        vector<vector<Neuron*>*>* _layers;
 
         int numOfLayers;
         int* configurazione;

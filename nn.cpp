@@ -26,35 +26,37 @@ double heaviside(double inp) {
 }
 
 Neuron::Neuron(int n) :numInputs(n) {
-    this->w = new double[n];
+    this->w = new vector<double>();
+    this->w->reserve(numInputs + 1);
+
     this->activation = &heaviside;
 
-    for (int i = 0; i < n; i++) {
-        this->w[i] = (((double)rand()) / (double)RAND_MAX) * (100 + 100) - 100;
+    for (int j = 0; j < numInputs; j++) {
+        this->w->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
     }
-    this->b = (((double)rand()) / (double)RAND_MAX) * (100 + 100) - 100;
+    this->w->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
 }
 
 Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
-    this->w = new double[n];
+    this->w = new vector<double>();
+    this->w->reserve(numInputs + 1);
+
     this->activation = activ;
-    for (int i = 0; i < n; i++) {
-        this->w[i] = (((double)rand()) / (double)RAND_MAX) * (100 + 100) - 100;
+
+    for (int j = 0; j < numInputs; j++) {
+        this->w->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
     }
-    this->b = (((double)rand()) / (double)RAND_MAX) * (100 + 100) - 100;
+    this->w->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
 }
 
 int Neuron::getNumInputs() {
     return this->numInputs;
 }
 
-double* Neuron::getWeights() {
+vector<double>* Neuron::getWeights() {
     return this->w;
 }
 
-double Neuron::getBias() {
-    return this->b;
-}
 
 void Neuron::print() {
     std::cout << "w=[";
@@ -69,24 +71,68 @@ void Neuron::print() {
 
 }
 
-double Neuron::output(double* x) {
-    int n = this->numInputs;
-    double res = 0.0;
-    for (int i = 0; i < n; i++) {
-        res += x[i] * this->w[i];
+double Neuron::activate(vector<double>* x) {
+
+    vector<double>* weights = this->getWeights();
+    double sum = 0.0;
+    int inputSize = x->size();
+    for (int i = 0; i < inputSize; i++) {
+        sum += weights->at(i) * x->at(i);
     }
-    res += this->b;
-    return this->activation(res);
+    sum += weights->at(inputSize); // bias sum
+    this->output = sum;
+    return this->activation(sum);
+
 }
-
-
 
 NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
 
-    /*
-     nl : num layers
-     [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
-    */
+
+    // nl : num layers
+    // [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
+
+
+    //this->layers = new vector<vector<unordered_map<string, void*>*>*>();
+    this->_layers = new vector<vector<Neuron*>*>();
+    this->_layers->reserve(nl);
+    for (int l = 1; l < nl + 1; l++) {
+        int numInputs = this->configurazione[l - 1];
+        int numOutputs = this->configurazione[l];
+
+        /*vector<unordered_map<string, void*>*>* layer = new vector<unordered_map<string, void*>*>();
+        layer->reserve(numOutputs);
+
+        for (int i = 0; i < numOutputs; i++) {
+            unordered_map<string, void*>* neuron = new unordered_map<string, void*>();
+            vector<double>* weights = new vector<double>();
+            weights->reserve(numInputs + 1);
+            for (int j = 0; j < numInputs; j++) {
+                weights->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
+            }
+            weights->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
+            (*neuron)["weights"] = weights;
+            layer->push_back(neuron);
+        }*/
+
+        vector<Neuron*>* layer = new vector<Neuron*>();
+        layer->reserve(numOutputs);
+        for (int i = 0; i < numOutputs; i++) {
+            Neuron* neuron = new Neuron(numInputs + 1);
+            layer->push_back(neuron);
+        }
+
+        this->_layers->push_back(layer);
+
+    }
+}
+
+/*
+NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLayers(nl) {
+
+    
+    // nl : num layers
+    // [niumInput, numHiddenNeuron,..,numHiddenNeuron, numOutNeuron] -> [nl + 1]
+   
 
     this->layers = new vector<vector<unordered_map<string, void*>*>*>();
     this->layers->reserve(nl);
@@ -112,7 +158,7 @@ NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLaye
         this->layers->push_back(layer);
 
     }
-}
+}*/
 
 double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {
     double sum = 0.0;
@@ -124,6 +170,37 @@ double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) 
     return sigmoid(sum);
 }
 
+vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
+    if (isLogActive) {
+        cout << "\nForwardpropagate\n";
+    }
+    vector<double>* currInputs = new vector<double>(*inputs);
+    for (int l = 0; l < this->numOfLayers; l++) {
+        if (isLogActive) {
+            cout << "\nlayer " << l;
+        }
+
+        vector<Neuron*>* layer = this->_layers->at(l);
+        int layerSize = layer->size();
+        vector<double>* newInputs = new vector<double>();
+        newInputs->reserve(layerSize);
+        for (int n = 0; n < layerSize; n++) {
+            Neuron* neuron = layer->at(n);
+            double neuronOut = neuron->activate(currInputs);
+            double* pNeuronOut = new double[1];
+            pNeuronOut[0] = neuronOut;
+            newInputs->push_back(neuronOut);
+            if (isLogActive) {
+                cout << "\nneuronOut=" << neuronOut << " from map "<<endl;
+            }
+        }
+        delete currInputs;
+        currInputs = newInputs;
+    }
+    return currInputs;
+}
+
+/*
 vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
     if (isLogActive) {
         cout << "\nForwardpropagate\n";
@@ -152,7 +229,7 @@ vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
         currInputs = newInputs;
     }
     return currInputs;
-}
+}*/
 
 void NeuralNetwork::backPropagate(vector<double>* expected) {
     if (isLogActive) {
