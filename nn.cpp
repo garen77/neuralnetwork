@@ -109,7 +109,7 @@ NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLaye
         vector<Neuron*>* layer = new vector<Neuron*>();
         layer->reserve(numOutputs);
         for (int i = 0; i < numOutputs; i++) {
-            Neuron* neuron = new Neuron(numInputs + 1);
+            Neuron* neuron = new Neuron(numInputs);
             layer->push_back(neuron);
         }
 
@@ -281,6 +281,17 @@ void NeuralNetwork::trainNetwork(vector<vector<double>*>* trainingSet, double lr
         }
         if (isLogActive) {
             cout << "\nepoch = " << epoch << ", learning rate = " << lr << ", error = " << sumError << "\n";
+        }
+    }
+}
+
+void NeuralNetwork::print() {
+    for (int l = 0; l < this->numOfLayers; l++) {
+        vector<Neuron*>* layer = this->_layers->at(l);
+        int layerSize = layer->size();
+        for (int n = 0; n < layerSize; n++) {
+            Neuron* neuron = layer->at(n);
+            neuron->print();
         }
     }
 }

@@ -55,7 +55,7 @@ namespace neuralnetworks {
         void updateWeights(vector<double>* inputs, double lr);
 
         void trainNetwork(vector<vector<double>*>* trainingSet, double lr, int numEpochs, int numOutputs);
-
+        void print();
         int fit(vector<double>* inputs);
     };
 
