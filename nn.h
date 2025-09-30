@@ -25,6 +25,8 @@ namespace neuralnetworks {
         Neuron(int n);
         Neuron(int n, double(*activ)(double));
 
+        ~Neuron();
+
         int getNumInputs();
         vector<double>* getWeights();
         double getDelta();
@@ -40,14 +42,14 @@ namespace neuralnetworks {
     class NeuralNetwork {
 
     private:
-        vector<vector<unordered_map<string, void*>*>*>* layers;
         vector<vector<Neuron*>*>* _layers;
-
         int numOfLayers;
         int* configurazione;
 
     public:
         NeuralNetwork(int* conf, int nl);
+
+        ~NeuralNetwork();
 
         double activate(vector<double>* weights, vector<double>* inputs);
         vector<double>* forwardPropagate(vector<double>* inputs);

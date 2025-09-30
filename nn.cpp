@@ -49,6 +49,10 @@ Neuron::Neuron(int n, double(*activ)(double)) :numInputs(n) {
     this->w->push_back((((double)rand()) / (double)RAND_MAX) * (1 + 1) - 1);
 }
 
+Neuron::~Neuron() {
+    delete this->w;
+}
+
 int Neuron::getNumInputs() {
     return this->numInputs;
 }
@@ -116,6 +120,11 @@ NeuralNetwork::NeuralNetwork(int* conf, int nl) :configurazione(conf), numOfLaye
         this->_layers->push_back(layer);
 
     }
+}
+
+NeuralNetwork::~NeuralNetwork() {
+    delete this->_layers;
+    delete this->configurazione;
 }
 
 double NeuralNetwork::activate(vector<double>* weights, vector<double>* inputs) {

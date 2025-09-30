@@ -64,11 +64,11 @@ int main() {
     vector<double>* inps = new vector<double>{ 6.922596716,1.77106367 };
     int o = network->fit(inps);
     cout << "\nFit\nexpected = 1 out = " << o;
-    free(inps);
+    delete inps;
     inps = new vector<double>{ 3.396561688,4.400293529 };
     o = network->fit(inps);
     cout << "\nFit\nexpected = 0 out = " << o << "\n";
-    free(inps);
+    delete inps;
 
     cout << "\nSecond train - xor\n";
     trainingSet->clear();
@@ -114,20 +114,25 @@ int main() {
     trainingSet->push_back(new vector<double>{ 1,1,0 });
 
     conf = new int[5]{ 2,3,4,4,2 };
+    delete network;
     network = new NeuralNetwork(conf, 4);
     network->trainNetwork(trainingSet, 0.7, 2000, 2);
 
     inps = new vector<double>{ 0,1 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nFit - xor\nexpected = 1 out = " << o << "\n";
     inps = new vector<double>{ 1,0 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nexpected = 1 out = " << o << "\n";
     inps = new vector<double>{ 1,1 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nexpected = 0 out = " << o << "\n";
     inps = new vector<double>{ 0,0 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nexpected = 0 out = " << o << "\n";
 
 
@@ -171,20 +176,25 @@ int main() {
     trainingSet->push_back(new vector<double>{ 1,1,1 });
 
     conf = new int[5]{ 2,3,4,4,2 };
+    delete network;
     network = new NeuralNetwork(conf, 4);
     network->trainNetwork(trainingSet, 0.7, 2000, 2);
 
     inps = new vector<double>{ 0,1 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nFit - xnor\nexpected = 0 out = " << o << "\n";
     inps = new vector<double>{ 1,0 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nexpected = 0 out = " << o << "\n";
     inps = new vector<double>{ 1,1 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nexpected = 1 out = " << o << "\n";
     inps = new vector<double>{ 0,0 };
     o = network->fit(inps);
+    delete inps;
     cout << "\nexpected = 1 out = " << o << "\n";
 
     cout << "\n-----end------\n";
