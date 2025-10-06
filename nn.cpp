@@ -209,6 +209,7 @@ void NeuralNetwork::backPropagate(vector<double>* expected) {
                 cout << "\nneuronDelta =" << neuronDelta<<endl;
             }
         }
+        delete errors;
     }
 }
 
@@ -254,7 +255,7 @@ void NeuralNetwork::updateWeights(vector<double>* inputs, double lr) {
             }
             w->at(currInputsSize) += lr * neuronDelta;
         }
-
+        delete currInputs;
     }
 }
 
@@ -319,10 +320,10 @@ int NeuralNetwork::fit(vector<double>* inputs) {
         }
     }
     vector<double>::iterator it = find(outputs->begin(), outputs->end(), maxOut);
+    int res = -1;
     if (it != outputs->end()) {
-        return it - outputs->begin();
+        res = it - outputs->begin();
+        delete outputs;
     }
-    else {
-        return -1;
-    }
+    return res;
 }
