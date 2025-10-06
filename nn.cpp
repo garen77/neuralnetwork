@@ -154,8 +154,6 @@ vector<double>* NeuralNetwork::forwardPropagate(vector<double>* inputs) {
         for (int n = 0; n < layerSize; n++) {
             Neuron* neuron = layer->at(n);
             double neuronOut = neuron->activate(currInputs);
-            double* pNeuronOut = new double[1];
-            pNeuronOut[0] = neuronOut;
             newInputs->push_back(neuronOut);
             if (isLogActive) {
                 cout << "\nneuronOut=" << neuronOut << " from map "<<neuron->getOutput() << endl;
@@ -206,7 +204,6 @@ void NeuralNetwork::backPropagate(vector<double>* expected) {
             Neuron* neuron = layer->at(j);
             double neuronOut = neuron->getOutput();
             double neuronDelta = errors->at(j) * neuronOut * (1 - neuronOut);
-            double* pNeuronDelta = new double[1];
             neuron->setDelta(neuronDelta);
             if (isLogActive) {
                 cout << "\nneuronDelta =" << neuronDelta<<endl;
@@ -287,6 +284,9 @@ void NeuralNetwork::trainNetwork(vector<vector<double>*>* trainingSet, double lr
             }
             this->backPropagate(expected);
             this->updateWeights(inputs, lr);
+            delete inputs;
+            delete outputs;
+            delete expected;
         }
         if (isLogActive) {
             cout << "\nepoch = " << epoch << ", learning rate = " << lr << ", error = " << sumError << "\n";
